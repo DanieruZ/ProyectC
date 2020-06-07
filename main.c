@@ -4,6 +4,7 @@
 #include "gotoxy.h"
 #include <stdbool.h>
 
+// Probando cambios.
 
 #define DIM_CLI 10000
 #define ESC 27
