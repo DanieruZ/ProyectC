@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1491400448 source:c:\users\home\desktop\programacion\proyectc\gotoxy.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
+1591563300 source:c:\users\home\desktop\programacion\proyectc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	"gotoxy.h"
+	<stdbool.h>
+
+1491399894 c:\users\home\desktop\programacion\proyectc\gotoxy.h
+
