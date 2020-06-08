@@ -49,6 +49,7 @@ void menuppal ();
 void submenuCli ();
 void submenuConsu();
 void submenuConsultasCli ();
+void submenuModificaCli ();
 
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
@@ -79,6 +80,7 @@ stCliente buscaUnClienteEmailArchivo(char email[]);
 stCliente buscaUnClienteDomicilioArchivo(char domicilio[]);
 stCliente buscaUnClienteNroClienteArchivo(int nroCli);
 stCliente buscaUnClienteMovilArchivo(char movil[]);
+stCliente buscaUnClienteIdArchivo(int id);
 stCliente modificaNroCliente(stCliente a,int numero);
 stCliente modificaNombreCliente(stCliente a,char nombre[]);
 stCliente modificaApellidoCliente(stCliente a,char apellido[]);
@@ -87,22 +89,38 @@ stCliente modificaEmailCliente(stCliente a,char email[]);///validar previamente 
 stCliente modificaMovilCliente(stCliente a,char movil[]);
 stCliente modificaBajaCliente(stCliente a,int baja);
 
-
-
+///funciones de modificacion en el archivo
+void modificaArchClienteNombre(int id ,char nombreNuevo[]);
 
 
 
 int main()
 {
-    stCliente c,consulta;
+    stCliente c,consulta,modifica;
 
     int opcionPpal=0;
     int opcionCli=0;
     int opcionConsu=0;
     int opcionConsultaCli=0;
+    int opcionModificaCli=0;
+
     printtest();
     Sleep(1500);
-    int nroConsulta;
+
+    int nroConsulta,dniConsu;
+    char nombreConsu[30];
+    char apellidoConsu[30];
+    char emailConsu[45];
+    char domicilioConsu[45];
+    char movilConsu[45];
+
+    int idModifica;
+    int nroModifica,dniModifica;
+    char nombreModifica[30];
+    char apellidoModifica[30];
+    char emailModifica[45];
+    char domicilioModifica[45];
+    char movilModifica[45];
 
     do
     {
@@ -149,34 +167,31 @@ int main()
 
 
                 case 3:
-                    printf("\n Submenu de Modificacion");
-
-                    break;
-
-
-                case 4:
-                   do
+                    gotoxy(30,3);
+                    printf("<<<MODIFICACIONES>>>");
+                    gotoxy(10,3);
+                    printf("Ingrese el ID del cliente que desee modificar");///usamos id
+                    scanf("%d",&idModifica);
+                    modifica=buscaUnClienteIdArchivo(idModifica);
+                    if(modifica.id!=-1){
+                    do
                     {
                         system("cls");
-                        submenuConsultasCli();
+                        submenuModificaCli();
                         color(9);
                         printf("Opcion: ");
                         color(7);
-                        scanf("%d",&opcionConsultaCli);
+                        scanf("%d",&opcionModificaCli);
                         system("cls");
-                        switch(opcionConsultaCli)
+                        switch(opcionModificaCli)
                         {
                         case 1:
-                         printf("Ingrese el nro de cliente");
-                         scanf("%d",&nroConsulta);
-                         consulta=buscaUnClienteNroClienteArchivo(nroConsulta);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("El numero de cliente %d no se encontro",nroConsulta);
-                         }
-                         system("pause");
+                           printf("El actual nombre es %s.Ingrese el nuevo nombre :",modifica.nombre);
+                           fflush(stdin);
+                           gets(nombreModifica);
+                           modificaArchClienteNombre(idModifica,nombreModifica);
+                           system("pause");
+
                             break;
 
                         case 2:
@@ -201,6 +216,134 @@ int main()
 
                         case 7:
 
+                            break;
+                        }
+
+
+
+                    }
+                    while(opcionModificaCli!=0);
+                    }
+                    else
+                        {
+                        printf("No se encuentra un cliente con el id %d",idModifica);
+                    }
+                 system("pause");
+                    break;
+
+
+                case 4:
+                   do
+                    {
+                        system("cls");
+                        submenuConsultasCli();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionConsultaCli);
+                        system("cls");
+                        switch(opcionConsultaCli)
+                        {
+                        case 1:
+                         printf("Ingrese el nro de cliente :");
+                         scanf("%d",&nroConsulta);
+                         consulta=buscaUnClienteNroClienteArchivo(nroConsulta);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el numero de cliente %d ",nroConsulta);
+                         }
+                         system("pause");
+                            break;
+
+                        case 2:
+
+                         printf("Ingrese el nombre de cliente :");
+                         fflush(stdin);
+                         gets(nombreConsu);
+                         consulta=buscaUnClienteNombreArchivo(nombreConsu);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el nombre %s ",nombreConsu);
+                         }
+                         system("pause");
+                            break;
+
+                        case 3:
+
+                           printf("Ingrese el apellido de cliente :");
+                         fflush(stdin);
+                         gets(apellidoConsu);
+                         consulta=buscaUnClienteApellidoArchivo(apellidoConsu);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el apellido %s ",apellidoConsu);
+                         }
+                         system("pause");
+                            break;
+
+                        case 4:
+
+                         printf("Ingrese el dni de cliente :");
+                         scanf("%d",&dniConsu);
+                         consulta=buscaUnClienteDniArchivo(dniConsu);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el dni  %d ",dniConsu);
+                         }
+                         system("pause");
+                            break;
+
+                        case 5:
+
+                        printf("Ingrese el email de cliente :");
+                         fflush(stdin);
+                         gets(emailConsu);
+                         consulta=buscaUnClienteEmailArchivo(emailConsu);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el email %s ",emailConsu);
+                         }
+                         system("pause");
+                            break;
+
+                        case 6:
+
+                         printf("Ingrese el el domicilio de cliente :");
+                         fflush(stdin);
+                         gets(domicilioConsu);
+                         consulta=buscaUnClienteDomicilioArchivo(domicilioConsu);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el domicilio %s ",domicilioConsu);
+                         }
+                         system("pause");
+                            break;
+
+                        case 7:
+
+                         printf("Ingrese el movil de cliente :");
+                         fflush(stdin);
+                         gets(movilConsu);
+                         consulta=buscaUnClienteMovilArchivo(movilConsu);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("No se encuentra un cliente con el movil %s ",movilConsu);
+                         }
+                         system("pause");
                             break;
                         }
 
@@ -406,6 +549,32 @@ void submenuConsultasCli ()
     printf("0-Salir");
     gotoxy(45,12);
 }
+
+void submenuModificaCli ()
+{
+    color(3);
+    gotoxy(35,3);
+    printf("  Menu Modificaciones: ");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Nro Cliente");
+    gotoxy(30,6);
+    printf("[2].- Nombre");
+    gotoxy(30,7);
+    printf("[3].- Apellido ");
+    gotoxy(30,8);
+    printf("[4].- Dni ");
+    gotoxy(30,9);
+    printf("[5].- Email");
+    gotoxy(30,10);
+    printf("[6].- Domicilio");
+    gotoxy(30,11);
+    printf("[7].- Nro movil");
+    gotoxy(30,12);
+    printf("0-Salir");
+    gotoxy(45,12);
+}
+
 
 /************************************************************************//**
 *
@@ -725,6 +894,25 @@ stCliente buscaUnClienteDniArchivo(int dni){
     return c;
 }
 
+stCliente buscaUnClienteIdArchivo(int id){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(c.id==id){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
 stCliente buscaUnClienteNroClienteArchivo(int nroCli){
     stCliente c;
     int flag=0;
@@ -809,8 +997,27 @@ MODIFICAR CLIENTE
 ------------------------------------------------------------------------------
 ***/
 
+/// FUNCION EN PROCESO
+/**
+void modificaArchClienteNombre(int id ,char nombreNuevo[]){
+ stCliente c;
 
-///REVISAR
+    FILE *pArchCliente = fopen(arCliente,"ab");
+    if(pArchCliente){
+        while( fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(c.id==id){
+
+                c.nombre=nombreNuevo;
+                fwrite(%c,sizeof(stCliente),1,pArchCliente);
+
+            }
+        }
+        fclose(pArchCliente);
+    }
+}
+
+*/
+
 
 stCliente modificaNroCliente(stCliente a,int numero){
 stCliente c=a;
