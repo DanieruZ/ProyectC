@@ -4,7 +4,6 @@
 #include "gotoxy.h"
 #include <stdbool.h>
 
-// Probando cambios.
 
 #define DIM_CLI 10000
 #define ESC 27
@@ -49,6 +48,8 @@ int validaEmail(char email[]);
 void menuppal ();
 void submenuCli ();
 void submenuConsu();
+void submenuConsultasCli ();
+
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
@@ -69,7 +70,22 @@ int validarNumero(char numero[]);
 
 
 
-
+void muestraClienteArchivoActivo();
+void muestraClienteArchivoBaja();
+stCliente buscaUnClienteApellidoArchivo(char apellido[]);
+stCliente buscaUnClienteNombreArchivo(char nombre[]);
+stCliente buscaUnClienteDniArchivo(int dni);
+stCliente buscaUnClienteEmailArchivo(char email[]);
+stCliente buscaUnClienteDomicilioArchivo(char domicilio[]);
+stCliente buscaUnClienteNroClienteArchivo(int nroCli);
+stCliente buscaUnClienteMovilArchivo(char movil[]);
+stCliente modificaNroCliente(stCliente a,int numero);
+stCliente modificaNombreCliente(stCliente a,char nombre[]);
+stCliente modificaApellidoCliente(stCliente a,char apellido[]);
+stCliente modificaDniCliente(stCliente a,int dni);
+stCliente modificaEmailCliente(stCliente a,char email[]);///validar previamente el email
+stCliente modificaMovilCliente(stCliente a,char movil[]);
+stCliente modificaBajaCliente(stCliente a,int baja);
 
 
 
@@ -78,14 +94,15 @@ int validarNumero(char numero[]);
 
 int main()
 {
-    stCliente c;
+    stCliente c,consulta;
 
     int opcionPpal=0;
     int opcionCli=0;
     int opcionConsu=0;
+    int opcionConsultaCli=0;
     printtest();
     Sleep(1500);
-
+    int nroConsulta;
 
     do
     {
@@ -138,7 +155,59 @@ int main()
 
 
                 case 4:
-                    printf("\n Submenu de Consulta");
+                   do
+                    {
+                        system("cls");
+                        submenuConsultasCli();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionConsultaCli);
+                        system("cls");
+                        switch(opcionConsultaCli)
+                        {
+                        case 1:
+                         printf("Ingrese el nro de cliente");
+                         scanf("%d",&nroConsulta);
+                         consulta=buscaUnClienteNroClienteArchivo(nroConsulta);
+                         if(consulta.id!=-1){
+                            muestraUnCliente(consulta);
+                         }
+                         else{
+                            printf("El numero de cliente %d no se encontro",nroConsulta);
+                         }
+                         system("pause");
+                            break;
+
+                        case 2:
+
+                            break;
+
+                        case 3:
+
+                            break;
+
+                        case 4:
+
+                            break;
+
+                        case 5:
+
+                            break;
+
+                        case 6:
+
+                            break;
+
+                        case 7:
+
+                            break;
+                        }
+
+
+
+                    }
+                    while(opcionConsultaCli!=0);
 
                     break;
 
@@ -308,6 +377,35 @@ void submenuConsu()
     gotoxy(45,10);
 }
 
+/**
+*
+* \brief funcion que muestra el Submenu de Consulta del cliente
+*
+*/
+void submenuConsultasCli ()
+{
+    color(3);
+    gotoxy(35,3);
+    printf("  Menu Consultas: ");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Nro Cliente");
+    gotoxy(30,6);
+    printf("[2].- Nombre");
+    gotoxy(30,7);
+    printf("[3].- Apellido ");
+    gotoxy(30,8);
+    printf("[4].- Dni ");
+    gotoxy(30,9);
+    printf("[5].- Email");
+    gotoxy(30,10);
+    printf("[6].- Domicilio");
+    gotoxy(30,11);
+    printf("[7].- Nro movil");
+    gotoxy(30,12);
+    printf("0-Salir");
+    gotoxy(45,12);
+}
 
 /************************************************************************//**
 *
@@ -384,20 +482,17 @@ void guardaClienteArchivo (stCliente c)
 *
 ***************************************************************************/
 void cargaClienteArchivo ()
-{
-    int p=0;
-    stCliente c;
+{    stCliente c;
     char opcion =0;
     while(opcion!=27)
     {
         system("cls");
         printf("Sistema de Alta de Clientes...");
         c=cargaUnCliente();
-        p=buscaUltimoId();
-        printf("\nTrae ultimo ID %d",p);
+       c.id=buscaUltimoId()+1;
+       guardaClienteArchivo(c);
+        printf("\nUltimo ID %d",c.id);
         system("pause");
-        c.id=p+1;
-        guardaClienteArchivo(c);
         printf("ESC para salir ");
         opcion=getch();
     }
@@ -465,22 +560,6 @@ void mensajeEmailError (int dato)
 }
 
 
-/************************************************************************//**
-*
-* \brief funcion que muestra un error si se intenta ingresar letras en vez de numeros en nro cliente
-* \param un entero que es devuelto de la funcion de validar numero
-*
-***************************************************************************/
-void mensajeNroCliError (int dato)
-{
-    stCliente c;
-    if(!validarNumero(c.nroCliente) == dato)
-    {
-        gotoxy(3,5);
-        printf("Ingresar Solo Numeros..");
-    }
-}
-
 
 /************************************************************************//**
 *
@@ -519,7 +598,7 @@ int buscaUltimoId()
     FILE *pArchCliente = fopen(arCliente,"rb");
     if(pArchCliente)
     {
-        fseek(pArchCliente, (-1),SEEK_END);
+        fseek(pArchCliente, sizeof(stCliente)*(-1),SEEK_END);
         if(fread(&c,sizeof(stCliente),1,pArchCliente) > 0)
         {
             id=c.id;
@@ -558,198 +637,219 @@ void printtest()
 
 
 
-int validarLetras(char nombre[])
+void muestraClienteArchivoActivo()
 {
-    int flag=0;
-    int i = 0, j;
-
-    j = strlen(nombre);
-
-    while (i < j && flag== 0)
+    stCliente c;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente)
     {
-        if (isalpha(nombre[i]) != 0)
-        {
-            i++;
+        while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {if(c.baja==0){
+            muestraUnCliente(c);}
         }
-        else
-        {
-
-            flag=1;
-        }
+        printf("\n");
+        fclose(pArchCliente);
     }
-
-    return flag;
 }
 
-int validarNumero(char numero[])
+void muestraClienteArchivoBaja()
 {
-    int flag=0;
-    int i = 0, j;
-
-    j = strlen(numero);
-
-    while (i < j && flag == 0)
+    stCliente c;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente)
     {
-        if (isdigit(numero[i]) == 0)
-        {
-            i++;
+        while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {if(c.baja==1){
+            muestraUnCliente(c);}
         }
-        else
-        {
-            flag=1;
-        }
+        printf("\n");
+        fclose(pArchCliente);
     }
-
-
-    return flag;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+stCliente buscaUnClienteApellidoArchivo(char apellido[]){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(strcmp(c.apellido, apellido) == 0){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+stCliente buscaUnClienteNombreArchivo(char nombre[]){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(strcmp(c.nombre, nombre) == 0){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+stCliente buscaUnClienteDniArchivo(int dni){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(c.dni==dni){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+stCliente buscaUnClienteNroClienteArchivo(int nroCli){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(c.nroCliente==nroCli){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+stCliente buscaUnClienteEmailArchivo(char email[]){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(strcmp(c.email,email) == 0){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+stCliente buscaUnClienteDomicilioArchivo(char domicilio[]){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(strcmp(c.domicilio,domicilio) == 0){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+stCliente buscaUnClienteMovilArchivo(char movil[]){
+    stCliente c;
+    int flag=0;
+    FILE *pArchCliente = fopen(arCliente,"rb");
+    if(pArchCliente){
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
+            if(strcmp(c.movil,movil) == 0){
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    if(flag==0){
+        c.id=-1;
+    }
+
+    return c;
+}
+
+
+
+/***
+------------------------------------------------------------------------------
+MODIFICAR CLIENTE
+------------------------------------------------------------------------------
+***/
+
+
+///REVISAR
+
+stCliente modificaNroCliente(stCliente a,int numero){
+stCliente c=a;
+c.nroCliente=numero;
+return c;
+}
+
+stCliente modificaNombreCliente(stCliente a,char nombre[]){
+stCliente c=a;
+strcpy(c.nombre,nombre);
+return c;
+}
+
+stCliente modificaApellidoCliente(stCliente a,char apellido[]){
+stCliente c=a;
+strcpy(c.apellido,apellido);
+return c;
+}
+
+stCliente modificaDniCliente(stCliente a,int dni){
+stCliente c=a;
+c.dni=dni;
+return c;
+}
+
+stCliente modificaEmailCliente(stCliente a,char email[]){///validar previamente el email
+stCliente c=a;
+strcpy(c.email,email);
+return c;
+}
+
+stCliente modificaMovilCliente(stCliente a,char movil[]){
+stCliente c=a;
+strcpy(c.movil,movil);
+return c;
+}
+
+stCliente modificaBajaCliente(stCliente a,int baja){
+stCliente c=a;
+c.baja=baja;
+return c;
+}
