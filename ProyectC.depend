@@ -4,12 +4,17 @@
 	<stdlib.h>
 	<windows.h>
 
-1591563300 source:c:\users\home\desktop\programacion\proyectc\main.c
+1491371648 source:c:\users\jerer\onedrive\escritorio\proyectc\gotoxy.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
+1591577506 source:c:\users\jerer\onedrive\escritorio\proyectc\main.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
 	"gotoxy.h"
 	<stdbool.h>
 
-1491399894 c:\users\home\desktop\programacion\proyectc\gotoxy.h
+1491371094 c:\users\jerer\onedrive\escritorio\proyectc\gotoxy.h
 

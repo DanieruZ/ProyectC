@@ -91,7 +91,7 @@ stCliente modificaEmailCliente(stCliente a,char email[]);///validar previamente 
 stCliente modificaMovilCliente(stCliente a,char movil[]);
 void modificaBajaCliente(int baja);
 
-
+void modificaClienteNombre(int id,char nombre[]);
 
 void muestraClienteArchivoActivo();
 void muestraClienteArchivoBaja();
@@ -214,6 +214,7 @@ int main()
                            printf("El actual nombre es %s.Ingrese el nuevo nombre :",modifica.nombre);
                            fflush(stdin);
                            gets(nombreModifica);
+                           modificaClienteNombre(idModifica,nombreModifica);
 
                            system("pause");
 
@@ -1181,3 +1182,41 @@ void modificaBajaCliente(int baja)
     }
 
 }
+
+
+
+
+
+void modificaClienteNombre(int id,char nombre[])
+{
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id=id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        strcpy(c.nombre,nombre);
+
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+                {
+                    printf("El Cliente se actualizo Correctamente!!\n");
+                    muestraUnCliente(c);
+                    system("pause");
+                    fclose(pArchCliente);
+                }
+    }
+
+}
+
