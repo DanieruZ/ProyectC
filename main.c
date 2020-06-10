@@ -50,7 +50,7 @@ void submenuCli ();
 void submenuConsu();
 void submenuConsultasCli ();
 void submenuModificaCli ();
-
+void submenuMuestra();
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
@@ -82,19 +82,19 @@ stCliente buscaUnClienteNroClienteArchivo(int nroCli);
 stCliente buscaUnClienteMovilArchivo(char movil[]);
 stCliente buscaUnClienteIdArchivo(int id);
 
-//********
-stCliente modificaNroCliente(stCliente a,int numero);
-stCliente modificaNombreCliente(stCliente a,char nombre[]);
-stCliente modificaApellidoCliente(stCliente a,char apellido[]);
-stCliente modificaDniCliente(stCliente a,int dni);
-stCliente modificaEmailCliente(stCliente a,char email[]);///validar previamente el email
-stCliente modificaMovilCliente(stCliente a,char movil[]);
+//******** PROTOTIPADO FUNCIONES DE MODIFICACION
+void modificaClienteNroCliente(int id, int nroCli); /// Funcion verificar si la vamos a usar para que solo el Admin pueda administrar este campo..
+void modificaClienteNombre(int id,char nombre[]);
+void modificaClienteApellido(int id,char apellido[]);
+void modificaClienteDni(int id, int dni);
+void modificaClienteEmail(int id, char email [ ]);
+void modificaClienteDomicilio(int id, char domicilio [ ]);
+void modificaClienteMovil(int id, char movil [ ]);
 void modificaBajaCliente(int baja);
 
-void modificaClienteNombre(int id,char nombre[]);
 
-void muestraClienteArchivoActivo();
-void muestraClienteArchivoBaja();
+
+
 
 
 
@@ -117,12 +117,13 @@ int main()
     ///***   Varibles usadas en los llamados de las funciones   ***///
     int opcionConsultaCli=0;
     int opcionModificaCli=0;
+    int opcionMuestraCli=0;
 
     printtest(); /// MENSAJE DE INICIO
     Sleep(1500); /// el tiempo que demora el mensaje en pantalla
     int nroConsulta;
 
-
+    ///*** Variables usadas para las funciones de consultas.
     int  dniConsu;
     char nombreConsu[30];
     char apellidoConsu[30];
@@ -130,6 +131,7 @@ int main()
     char domicilioConsu[45];
     char movilConsu[45];
 
+    ///*** Variables usadas para las funciones de modificacion
     int idModifica;
     int nroModifica,dniModifica;
     char nombreModifica[30];
@@ -137,6 +139,7 @@ int main()
     char emailModifica[45];
     char domicilioModifica[45];
     char movilModifica[45];
+    int varEmail=0; /// Para tomar lo que retorna la funcion de valida email.
 
 
     do
@@ -192,74 +195,113 @@ int main()
 
                 case 3:
                     printf("\n Submenu de Modificacion");
-                 gotoxy(30,3);
+                    gotoxy(30,3);
                     printf("<<<MODIFICACIONES>>>");
                     gotoxy(10,3);
-                    printf("Ingrese el ID del cliente que desee modificar");///usamos id
+                    printf("Ingrese el ID del cliente que desee modificar: ");///usamos id
                     scanf("%d",&idModifica);
                     modifica=buscaUnClienteIdArchivo(idModifica);
-                    if(modifica.id!=-1){
-                    do
+                    if(modifica.id!=-1)
                     {
-                        system("cls");
-                        submenuModificaCli();
-                        color(9);
-                        printf("Opcion: ");
-                        color(7);
-                        scanf("%d",&opcionModificaCli);
-                        system("cls");
-                        switch(opcionModificaCli)
+                        do
                         {
-                        case 1:
-                           printf("El actual nombre es %s.Ingrese el nuevo nombre :",modifica.nombre);
-                           fflush(stdin);
-                           gets(nombreModifica);
-                           modificaClienteNombre(idModifica,nombreModifica);
+                            system("cls");
+                            submenuModificaCli();
+                            color(9);
+                            printf("Opcion: ");
+                            color(7);
+                            scanf("%d",&opcionModificaCli);
+                            system("cls");
+                            switch(opcionModificaCli)
+                            {
+                            case 1:
+                                printf("El actual Nombre es %s.Ingrese el nuevo Nombre :",modifica.nombre);
+                                fflush(stdin);
+                                gets(nombreModifica);
+                                modificaClienteNombre(idModifica,nombreModifica);
+                                system("pause");
 
-                           system("pause");
 
-                            break;
+                                break;
 
-                        case 2:
+                            case 2:
+                                printf("El actual Apellido es %s.Ingrese el nuevo Apellido :",modifica.apellido);
+                                fflush(stdin);
+                                gets(apellidoModifica);
+                                modificaClienteApellido(idModifica,apellidoModifica);
+                                system("pause");
 
-                            break;
 
-                        case 3:
+                                break;
 
-                            break;
+                            case 3:
+                                printf("El actual Dni es %d.Ingrese el nuevo Dni :",modifica.dni);
+                                scanf("%d",&dniModifica);
+                                modificaClienteDni(idModifica,dniModifica);
+                                system("pause");
 
-                        case 4:
 
-                            break;
+                                break;
 
-                        case 5:
+                            case 4:
+                                while(varEmail==0) /// Ciclo que lo usamos para que ingrese un email valido al modificar el campo de email.
+                                {
+                                    system("cls");
+                                    printf("El actual Email es %s.Ingrese el nuevo Email :",modifica.email);
+                                    fflush(stdin);
+                                    gets(emailModifica);
+                                    varEmail= validaEmail(emailModifica);
+                                    mensajeEmailError(varEmail);
+                                    system("pause");
+                                    system("cls");
+                                }
+                                modificaClienteEmail(idModifica,emailModifica);
+                                system("pause");
 
-                            break;
 
-                        case 6:
+                                break;
 
-                            break;
+                            case 5:
+                                printf("El actual Domicilio es %s.Ingrese el nuevo Domicilio :",modifica.domicilio);
+                                fflush(stdin);
+                                gets(domicilioModifica);
+                                modificaClienteDomicilio(idModifica,domicilioModifica);
+                                system("pause");
 
-                        case 7:
 
-                            break;
+                                break;
+
+                            case 6:
+                                printf("El actual Movil es %s.Ingrese el nuevo Movil :",modifica.movil);
+                                fflush(stdin);
+                                gets(movilModifica);
+                                modificaClienteMovil(idModifica,movilModifica);
+                                system("pause");
+
+
+                                break;
+                            default:
+
+                                printf("\nOpcion NO Valida...");
+                                break;
+
+                            }
+
+
+
                         }
-
-
-
-                    }
-                    while(opcionModificaCli!=0);
+                        while(opcionModificaCli!=0);
                     }
                     else
-                        {
+                    {
                         printf("No se encuentra un cliente con el id %d",idModifica);
                     }
-                 system("pause");
+                    system("pause");
                     break;
 
 
                 case 4:
-                   do
+                    do
                     {
                         system("cls");
                         submenuConsultasCli();
@@ -271,105 +313,119 @@ int main()
                         switch(opcionConsultaCli)
                         {
                         case 1:
-                         printf("Ingrese el nro de cliente :");
-                         scanf("%d",&nroConsulta);
-                         consulta=buscaUnClienteNroClienteArchivo(nroConsulta);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el numero de cliente %d ",nroConsulta);
-                         }
-                         system("pause");
+                            printf("Ingrese el nro de cliente :");
+                            scanf("%d",&nroConsulta);
+                            consulta=buscaUnClienteNroClienteArchivo(nroConsulta);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el numero de cliente %d ",nroConsulta);
+                            }
+                            system("pause");
                             break;
 
                         case 2:
 
-                         printf("Ingrese el nombre de cliente :");
-                         fflush(stdin);
-                         gets(nombreConsu);
-                         consulta=buscaUnClienteNombreArchivo(nombreConsu);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el nombre %s ",nombreConsu);
-                         }
-                         system("pause");
+                            printf("Ingrese el nombre de cliente :");
+                            fflush(stdin);
+                            gets(nombreConsu);
+                            consulta=buscaUnClienteNombreArchivo(nombreConsu);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el nombre %s ",nombreConsu);
+                            }
+                            system("pause");
                             break;
 
                         case 3:
 
-                           printf("Ingrese el apellido de cliente :");
-                         fflush(stdin);
-                         gets(apellidoConsu);
-                         consulta=buscaUnClienteApellidoArchivo(apellidoConsu);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el apellido %s ",apellidoConsu);
-                         }
-                         system("pause");
+                            printf("Ingrese el apellido de cliente :");
+                            fflush(stdin);
+                            gets(apellidoConsu);
+                            consulta=buscaUnClienteApellidoArchivo(apellidoConsu);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el apellido %s ",apellidoConsu);
+                            }
+                            system("pause");
                             break;
 
                         case 4:
 
-                         printf("Ingrese el dni de cliente :");
-                         scanf("%d",&dniConsu);
-                         consulta=buscaUnClienteDniArchivo(dniConsu);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el dni  %d ",dniConsu);
-                         }
-                         system("pause");
+                            printf("Ingrese el dni de cliente :");
+                            scanf("%d",&dniConsu);
+                            consulta=buscaUnClienteDniArchivo(dniConsu);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el dni  %d ",dniConsu);
+                            }
+                            system("pause");
                             break;
 
                         case 5:
 
-                        printf("Ingrese el email de cliente :");
-                         fflush(stdin);
-                         gets(emailConsu);
-                         consulta=buscaUnClienteEmailArchivo(emailConsu);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el email %s ",emailConsu);
-                         }
-                         system("pause");
+                            printf("Ingrese el email de cliente :");
+                            fflush(stdin);
+                            gets(emailConsu);
+                            consulta=buscaUnClienteEmailArchivo(emailConsu);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el email %s ",emailConsu);
+                            }
+                            system("pause");
                             break;
 
                         case 6:
 
-                         printf("Ingrese el el domicilio de cliente :");
-                         fflush(stdin);
-                         gets(domicilioConsu);
-                         consulta=buscaUnClienteDomicilioArchivo(domicilioConsu);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el domicilio %s ",domicilioConsu);
-                         }
-                         system("pause");
+                            printf("Ingrese el el domicilio de cliente :");
+                            fflush(stdin);
+                            gets(domicilioConsu);
+                            consulta=buscaUnClienteDomicilioArchivo(domicilioConsu);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el domicilio %s ",domicilioConsu);
+                            }
+                            system("pause");
                             break;
 
                         case 7:
 
-                         printf("Ingrese el movil de cliente :");
-                         fflush(stdin);
-                         gets(movilConsu);
-                         consulta=buscaUnClienteMovilArchivo(movilConsu);
-                         if(consulta.id!=-1){
-                            muestraUnCliente(consulta);
-                         }
-                         else{
-                            printf("No se encuentra un cliente con el movil %s ",movilConsu);
-                         }
-                         system("pause");
+                            printf("Ingrese el movil de cliente :");
+                            fflush(stdin);
+                            gets(movilConsu);
+                            consulta=buscaUnClienteMovilArchivo(movilConsu);
+                            if(consulta.id!=-1)
+                            {
+                                muestraUnCliente(consulta);
+                            }
+                            else
+                            {
+                                printf("No se encuentra un cliente con el movil %s ",movilConsu);
+                            }
+                            system("pause");
                             break;
                         }
 
@@ -381,9 +437,39 @@ int main()
 
 
                 case 5:
-                    printf("\n Submenu de Listado");
-                    muestraClienteArchivo();
+                    do
+                    {
+                        system("cls");
+                        submenuMuestra();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionMuestraCli);
+                        system("cls");
+                        switch(opcionMuestraCli)
+                        {
+                        case 1:
+                            muestraClienteArchivo();
+                            system("pause");
+                            break;
 
+                        case 2:
+                            muestraClienteArchivoActivo();
+                            system("pause");
+                            break;
+
+                        case 3:
+                            muestraClienteArchivoBaja();
+                            system("pause");
+                            break;
+
+
+                        }
+
+
+
+                    }
+                    while(opcionMuestraCli!=0);
                     system("pause");
                     break;
 
@@ -461,9 +547,29 @@ int main()
 }
 
 
+/************************************************************************//**
+*
+* \brief funcion que muestra Un mensaje con el logo del programa
+*
+***************************************************************************/
+void printtest()
+{
 
+    printf("\t\t                                                ##                             \n");
+    printf("\t\t                                                          ###                  \n");
+    printf("\t\t ###   ###                 ####  .###                     ##                   \n");
+    printf("\t\t ###   ###                 ##### ####                                          \n");
+    printf("\t\t ###   ### ###########     # ### ####    #####  ####  ## ###: ###              \n");
+    printf("\t\t ###   ###    ####         # #### ###  ###  ###  ###  ##  ##: ###              \n");
+    printf("\t\t ###   ###    ####         #  ### ###  ###   ### ###  #   ##: ###              \n");
+    printf("\t\t ###   ###     ##          #  ##  ###  ###   ###  ### #   ##: ###              \n");
+    printf("\t\t ###   ###     ##          #   #  ###  ###   ###  ####    ##: ###.             \n");
+    printf("\t\t ###   ###     ##          #      ###  ###  ###   ####    ##: ######           \n");
+    printf("\t\t ###   ###     ###         ##     ###   ######     ###    ##:  ########        \n");
+    printf("\t\t  ######        #####                     ##                                   \n");
+    color(7);
 
-
+}
 
 
 
@@ -546,16 +652,16 @@ void submenuConsu()
     gotoxy(45,10);
 }
 
-/**
+/**************************************************************
 *
 * \brief funcion que muestra el Submenu de Consulta del cliente
 *
-*/
+**************************************************************/
 void submenuConsultasCli ()
 {
     color(3);
     gotoxy(35,3);
-    printf("  Menu Consultas: ");
+    printf("Menu Consultas: ");
     color(7);
     gotoxy(30,5);
     printf("[1].- Nro Cliente");
@@ -576,32 +682,54 @@ void submenuConsultasCli ()
     gotoxy(45,12);
 }
 
+
+/**************************************************************
+*
+* \brief funcion que muestra el Submenu de modificacion cliente
+*
+**************************************************************/
 void submenuModificaCli ()
 {
     color(3);
     gotoxy(35,3);
-    printf("  Menu Modificaciones: ");
+    printf("Menu Modificaciones: ");
     color(7);
     gotoxy(30,5);
-    printf("[1].- Nro Cliente");
+    printf("[1].- Nombre");
     gotoxy(30,6);
-    printf("[2].- Nombre");
+    printf("[2].- Apellido");
     gotoxy(30,7);
-    printf("[3].- Apellido ");
+    printf("[3].- Dni ");
     gotoxy(30,8);
-    printf("[4].- Dni ");
+    printf("[4].- Email ");
     gotoxy(30,9);
-    printf("[5].- Email");
+    printf("[5].- Domicilio");
     gotoxy(30,10);
-    printf("[6].- Domicilio");
+    printf("[6].- Nro Movil");
     gotoxy(30,11);
-    printf("[7].- Nro movil");
-    gotoxy(30,12);
     printf("0-Salir");
-    gotoxy(45,12);
+    gotoxy(45,11);
+
+
 }
 
+void submenuMuestra()
+{
 
+    color(3);
+    gotoxy(35,3);
+    printf("Submenu de Listado");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Muestra listado completo");
+    gotoxy(30,6);
+    printf("[2].- Muestra listado de clientes de alta");
+    gotoxy(30,7);
+    printf("[3].- Muestra listado de clientes de baja");
+    gotoxy(30,8);
+    printf("0-Salir");
+    gotoxy(45,8);
+}
 
 /************************************************************************//**
 *
@@ -721,8 +849,7 @@ void muestraUnCliente(stCliente c) /// modificar para gotoxy
 
 /************************************************************************//**
 *
-* \brief funcion que muestra un cliente
-* \param Estrucutura cliente
+* \brief funcion que muestra un cliente del archivo
 *
 ***************************************************************************/
 void muestraClienteArchivo()
@@ -750,7 +877,8 @@ void muestraClienteArchivo()
 void mensajeEmailError (int dato)
 {
     stCliente c;
-    if(!validaEmail(c.email)== dato)
+
+    if(validaEmail(c.email)== dato)
     {
         gotoxy(3,13);
         printf("Ingresar Un Email Valido..");
@@ -809,32 +937,9 @@ int buscaUltimoId()
 
 /************************************************************************//**
 *
-* \brief funcion que muestra Un mensaje con el logo del programa
+* \brief funcion que muestra Los clientes activos del archivo
 *
 ***************************************************************************/
-void printtest()
-{
-
-    printf("\t\t                                                ##                             \n");
-    printf("\t\t                                                          ###                  \n");
-    printf("\t\t ###   ###                 ####  .###                     ##                   \n");
-    printf("\t\t ###   ###                 ##### ####                                          \n");
-    printf("\t\t ###   ### ###########     # ### ####    #####  ####  ## ###: ###              \n");
-    printf("\t\t ###   ###    ####         # #### ###  ###  ###  ###  ##  ##: ###              \n");
-    printf("\t\t ###   ###    ####         #  ### ###  ###   ### ###  #   ##: ###              \n");
-    printf("\t\t ###   ###     ##          #  ##  ###  ###   ###  ### #   ##: ###              \n");
-    printf("\t\t ###   ###     ##          #   #  ###  ###   ###  ####    ##: ###.             \n");
-    printf("\t\t ###   ###     ##          #      ###  ###  ###   ####    ##: ######           \n");
-    printf("\t\t ###   ###     ###         ##     ###   ######     ###    ##:  ########        \n");
-    printf("\t\t  ######        #####                     ##                                   \n");
-    color(7);
-
-}
-
-
-
-
-
 void muestraClienteArchivoActivo()
 {
     stCliente c;
@@ -853,6 +958,12 @@ void muestraClienteArchivoActivo()
     }
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que muestra Los clientes Inactivos del archivo
+*
+***************************************************************************/
 void muestraClienteArchivoBaja()
 {
     stCliente c;
@@ -872,6 +983,13 @@ void muestraClienteArchivoBaja()
 }
 
 
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por apellido
+* \param apellido (char)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteApellidoArchivo(char apellido[])
 {
     stCliente c;
@@ -896,6 +1014,14 @@ stCliente buscaUnClienteApellidoArchivo(char apellido[])
     return c;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por Nombre
+* \param Nombre (char)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteNombreArchivo(char nombre[])
 {
     stCliente c;
@@ -920,6 +1046,14 @@ stCliente buscaUnClienteNombreArchivo(char nombre[])
     return c;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por Dni
+* \param dni(int)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteDniArchivo(int dni)
 {
     stCliente c;
@@ -944,6 +1078,14 @@ stCliente buscaUnClienteDniArchivo(int dni)
     return c;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por NroCliente
+* \param nroCliente(int)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteNroClienteArchivo(int nroCli)
 {
     stCliente c;
@@ -968,6 +1110,14 @@ stCliente buscaUnClienteNroClienteArchivo(int nroCli)
     return c;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por Email
+* \param Email(char)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteEmailArchivo(char email[])
 {
     stCliente c;
@@ -992,6 +1142,14 @@ stCliente buscaUnClienteEmailArchivo(char email[])
     return c;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por Domicilio
+* \param Domicilio(char)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteDomicilioArchivo(char domicilio[])
 {
     stCliente c;
@@ -1016,6 +1174,14 @@ stCliente buscaUnClienteDomicilioArchivo(char domicilio[])
     return c;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por Movil
+* \param Movil(char)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
 stCliente buscaUnClienteMovilArchivo(char movil[])
 {
     stCliente c;
@@ -1040,19 +1206,32 @@ stCliente buscaUnClienteMovilArchivo(char movil[])
     return c;
 }
 
-stCliente buscaUnClienteIdArchivo(int id){
+
+/************************************************************************//**
+*
+* \brief funcion que busca un cliente en el archivo por Id
+* \param Id(int)
+* \return cliente Si lo encuentra devuelve el Id correspondiente, si no el Id=-1
+*
+***************************************************************************/
+stCliente buscaUnClienteIdArchivo(int id)
+{
     stCliente c;
     int flag=0;
     FILE *pArchCliente = fopen(arCliente,"rb");
-    if(pArchCliente){
-        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0){
-            if(c.id==id){
+    if(pArchCliente)
+    {
+        while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
+        {
+            if(c.id==id)
+            {
                 flag=1;
             }
         }
         fclose(pArchCliente);
     }
-    if(flag==0){
+    if(flag==0)
+    {
         c.id=-1;
     }
 
@@ -1060,58 +1239,287 @@ stCliente buscaUnClienteIdArchivo(int id){
 }
 
 
-
-/***
-------------------------------------------------------------------------------
-MODIFICAR CLIENTE
-------------------------------------------------------------------------------
-***/
-
-
-///REVISAR
-
-stCliente modificaNroCliente(stCliente a,int numero)
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de nro Cliente de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param nroCliente(int)
+*
+**********************************************************************************/
+void modificaClienteNroCliente(int id, int nroCli)
 {
-    stCliente c=a;
-    c.nroCliente=numero;
-    return c;
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        c.nroCliente=nroCli;
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+
 }
 
-stCliente modificaNombreCliente(stCliente a,char nombre[])
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de nombre de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param nombre(char)
+*
+**********************************************************************************/
+void modificaClienteNombre(int id,char nombre[])
 {
-    stCliente c=a;
-    strcpy(c.nombre,nombre);
-    return c;
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        strcpy(c.nombre,nombre);
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+
 }
 
-stCliente modificaApellidoCliente(stCliente a,char apellido[])
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de apellido de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param apellido(char)
+*
+**********************************************************************************/
+void modificaClienteApellido(int id,char apellido[])
 {
-    stCliente c=a;
-    strcpy(c.apellido,apellido);
-    return c;
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        strcpy(c.apellido,apellido);
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+
 }
 
-stCliente modificaDniCliente(stCliente a,int dni)
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de dni de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param dni(int)
+*
+**********************************************************************************/
+void modificaClienteDni(int id, int dni)
 {
-    stCliente c=a;
-    c.dni=dni;
-    return c;
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        c.dni=dni;
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+
 }
 
-stCliente modificaEmailCliente(stCliente a,char email[]) ///validar previamente el email
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de email de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param email(char)
+*
+**********************************************************************************/
+void modificaClienteEmail(int id, char email [ ])
 {
-    stCliente c=a;
-    strcpy(c.email,email);
-    return c;
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+
+        strcpy(c.email,email);
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+
 }
 
-stCliente modificaMovilCliente(stCliente a,char movil[])
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de domicilio de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param domicilio(char)
+*
+**********************************************************************************/
+void modificaClienteDomicilio(int id, char domicilio [ ])
 {
-    stCliente c=a;
-    strcpy(c.movil,movil);
-    return c;
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        strcpy(c.domicilio,domicilio);
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+
 }
 
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de movil de un cliente y lo guarda en el archivo
+* \param id(int)
+* \param movil (char)
+*
+**********************************************************************************/
+void modificaClienteMovil(int id, char movil [ ])
+{
+    stCliente c;
+    FILE *pArchCliente=fopen(arCliente,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchCliente)
+    {
+        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.id==id)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        strcpy(c.movil,movil);
+        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnCliente(c);
+            system("pause");
+            fclose(pArchCliente);
+        }
+    }
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de baja de un cliente 0 activo / 1 inactivo y lo guarda en el archivo
+* \param baja(int) seria el id
+*
+**********************************************************************************/
 void modificaBajaCliente(int baja)
 {
     stCliente c;
@@ -1184,39 +1592,4 @@ void modificaBajaCliente(int baja)
 }
 
 
-
-
-
-void modificaClienteNombre(int id,char nombre[])
-{
-    stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
-    int flag =-1;
-    int i=0;
-
-    if(pArchCliente)
-    {
-        while(flag==-1 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
-        {
-            if(c.id=id)
-            {
-                flag=i;
-            }
-            i++;
-        }
-
-
-        fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
-        strcpy(c.nombre,nombre);
-
-        if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
-                {
-                    printf("El Cliente se actualizo Correctamente!!\n");
-                    muestraUnCliente(c);
-                    system("pause");
-                    fclose(pArchCliente);
-                }
-    }
-
-}
 

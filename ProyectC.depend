@@ -18,3 +18,17 @@
 
 1491371094 c:\users\jerer\onedrive\escritorio\proyectc\gotoxy.h
 
+1591638672 source:d:\mis archivos\utn\programacion 1\trabajos practicos\proyectc\proyectc\gotoxy.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
+1591638672 source:d:\mis archivos\utn\programacion 1\trabajos practicos\proyectc\proyectc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	"gotoxy.h"
+	<stdbool.h>
+
+1591638672 d:\mis archivos\utn\programacion 1\trabajos practicos\proyectc\proyectc\gotoxy.h
+
