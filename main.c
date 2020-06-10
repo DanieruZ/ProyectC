@@ -7,8 +7,8 @@
 
 #define DIM_CLI 10000
 #define ESC 27
-#define arCliente "clientes.dat"
-#define arConsumo "consumo.dat"
+#define ARCH_CLIENTE "clientes.dat"
+#define ARCH_CONSUMO "consumo.dat"
 
 typedef struct
 {
@@ -39,6 +39,7 @@ void printtest();
 
 //******** PROTOTIPADO DE ERRORES
 void mensajeEmailError (int dato);
+void mensajeNroCliError (int dato);
 
 
 //******** PROTITPADO DE VALIDACION
@@ -51,6 +52,7 @@ void submenuConsu();
 void submenuConsultasCli ();
 void submenuModificaCli ();
 void submenuMuestra();
+
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
@@ -70,6 +72,7 @@ int buscaUltimoId();  /// BUSCA EL ULTIMO ID CARGADO EN EL ARCHIVO.
 
 //******** PROTOTIPADO FUNCIONES VALIDACION
 int validarNumero(char numero[]);
+int validaCliente(int nroCli);
 
 
 //******** PROTOTIPADO FUNCIONES BUSQUEDA
@@ -117,7 +120,6 @@ int main()
     ///***   Varibles usadas en los llamados de las funciones   ***///
     int opcionConsultaCli=0;
     int opcionModificaCli=0;
-    int opcionMuestraCli=0;
 
     printtest(); /// MENSAJE DE INICIO
     Sleep(1500); /// el tiempo que demora el mensaje en pantalla
@@ -140,6 +142,7 @@ int main()
     char domicilioModifica[45];
     char movilModifica[45];
     int varEmail=0; /// Para tomar lo que retorna la funcion de valida email.
+    int opcionMuestraCli=0; // Variable usada en el menu de muestra
 
 
     do
@@ -437,7 +440,7 @@ int main()
 
 
                 case 5:
-                    do
+                   do
                     {
                         system("cls");
                         submenuMuestra();
@@ -713,23 +716,31 @@ void submenuModificaCli ()
 
 }
 
-void submenuMuestra()
-{
 
-    color(3);
+
+/**************************************************************
+*
+* \brief funcion que muestra el Submenu de muestra
+*
+**************************************************************/
+void submenuMuestra()
+{    color(3);
     gotoxy(35,3);
     printf("Submenu de Listado");
     color(7);
     gotoxy(30,5);
-    printf("[1].- Muestra listado completo");
+    printf("[1].- Muestra Listado Completo");
     gotoxy(30,6);
-    printf("[2].- Muestra listado de clientes de alta");
+    printf("[2].- Muestra Listado de Clientes de Alta");
     gotoxy(30,7);
-    printf("[3].- Muestra listado de clientes de baja");
+    printf("[3].- Muestra Listado de Clientes de Baja");
     gotoxy(30,8);
     printf("0-Salir");
     gotoxy(45,8);
 }
+
+
+
 
 /************************************************************************//**
 *
@@ -746,10 +757,11 @@ stCliente cargaUnCliente()
         gotoxy(3,3);
         printf("Ingrese el nro de Cliente..........: ");
         scanf("%d",&c.nroCliente);
+        mensajeNroCliError(validaCliente(c.nroCliente));
 
 
     }
-    while(c.nroCliente<0 || c.nroCliente>9999999);
+    while(validaCliente(c.nroCliente)==1);
     gotoxy(3,5);
     printf("Ingrese el Nombre..................: ");
     fflush(stdin);
@@ -791,7 +803,7 @@ stCliente cargaUnCliente()
 ***************************************************************************/
 void guardaClienteArchivo (stCliente c)
 {
-    FILE *pArchCliente = fopen(arCliente,"ab");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"ab");
     if(pArchCliente)
     {
         fwrite(&c,sizeof(stCliente),1,pArchCliente);
@@ -855,7 +867,7 @@ void muestraUnCliente(stCliente c) /// modificar para gotoxy
 void muestraClienteArchivo()
 {
     stCliente c;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
@@ -882,6 +894,25 @@ void mensajeEmailError (int dato)
     {
         gotoxy(3,13);
         printf("Ingresar Un Email Valido..");
+    }
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que muestra un error si el email es incorrecto
+* \param un entero que es devuelto de la funcion de validar email
+*
+***************************************************************************/
+void mensajeNroCliError (int dato)
+{
+    stCliente c;
+
+    if(!validaCliente(c.nroCliente)== dato)
+    {
+        gotoxy(3,13);
+        printf("Nro Cliente Ya existente...");
+
     }
 }
 
@@ -913,6 +944,38 @@ int validaEmail(char email[])
 
 /************************************************************************//**
 *
+* \brief funcion que valida un cliente, verificar si existe o no en el archivo
+* \param nroCliente (int)
+* \return flag donde 0 si No es existe y 1 Si existe
+*
+***************************************************************************/
+int validaCliente(int nroCli)
+{
+    int i=0;
+    int flag=0;
+    stCliente c;
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    if(pArchCliente)
+    {
+        while(flag==0 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+
+            if(c.nroCliente == nroCli)
+            {
+                flag=1;
+            }
+        }
+        fclose(pArchCliente);
+
+    }
+
+
+    return flag;
+}
+
+
+/************************************************************************//**
+*
 * \brief funcion que muestra busca el ultimo Id ingresado en el Archivo
 * \return devuelve el ultimo ID del archivo
 *
@@ -921,7 +984,7 @@ int buscaUltimoId()
 {
     stCliente c;
     int id=-1;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         fseek(pArchCliente, sizeof(stCliente)*(-1),SEEK_END);
@@ -943,7 +1006,7 @@ int buscaUltimoId()
 void muestraClienteArchivoActivo()
 {
     stCliente c;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
@@ -967,7 +1030,7 @@ void muestraClienteArchivoActivo()
 void muestraClienteArchivoBaja()
 {
     stCliente c;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
@@ -994,7 +1057,7 @@ stCliente buscaUnClienteApellidoArchivo(char apellido[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1026,7 +1089,7 @@ stCliente buscaUnClienteNombreArchivo(char nombre[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1058,7 +1121,7 @@ stCliente buscaUnClienteDniArchivo(int dni)
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1090,7 +1153,7 @@ stCliente buscaUnClienteNroClienteArchivo(int nroCli)
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1122,7 +1185,7 @@ stCliente buscaUnClienteEmailArchivo(char email[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1154,7 +1217,7 @@ stCliente buscaUnClienteDomicilioArchivo(char domicilio[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1186,7 +1249,7 @@ stCliente buscaUnClienteMovilArchivo(char movil[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1218,7 +1281,7 @@ stCliente buscaUnClienteIdArchivo(int id)
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(arCliente,"rb");
+    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1249,7 +1312,7 @@ stCliente buscaUnClienteIdArchivo(int id)
 void modificaClienteNroCliente(int id, int nroCli)
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1288,7 +1351,7 @@ void modificaClienteNroCliente(int id, int nroCli)
 void modificaClienteNombre(int id,char nombre[])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1328,7 +1391,7 @@ void modificaClienteNombre(int id,char nombre[])
 void modificaClienteApellido(int id,char apellido[])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1367,7 +1430,7 @@ void modificaClienteApellido(int id,char apellido[])
 void modificaClienteDni(int id, int dni)
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1406,7 +1469,7 @@ void modificaClienteDni(int id, int dni)
 void modificaClienteEmail(int id, char email [ ])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1447,7 +1510,7 @@ void modificaClienteEmail(int id, char email [ ])
 void modificaClienteDomicilio(int id, char domicilio [ ])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1486,7 +1549,7 @@ void modificaClienteDomicilio(int id, char domicilio [ ])
 void modificaClienteMovil(int id, char movil [ ])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1523,7 +1586,7 @@ void modificaClienteMovil(int id, char movil [ ])
 void modificaBajaCliente(int baja)
 {
     stCliente c;
-    FILE *pArchCliente=fopen(arCliente,"r+b");
+    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
     int pasaje=0;
     int flag =-1;
     int i=0;
