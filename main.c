@@ -3,12 +3,14 @@
 #include <windows.h>
 #include "gotoxy.h"
 #include <stdbool.h>
+#include "time.h"
+#include <time.h>
 
 
 #define DIM_CLI 10000
 #define ESC 27
-#define ARCH_CLIENTE "clientes.dat"
-#define ARCH_CONSUMO "consumo.dat"
+#define AR_CLIENTE "clientes.dat"
+#define AR_CONSUMO "consumo.dat"
 
 typedef struct
 {
@@ -39,7 +41,6 @@ void printtest();
 
 //******** PROTOTIPADO DE ERRORES
 void mensajeEmailError (int dato);
-void mensajeNroCliError (int dato);
 
 
 //******** PROTITPADO DE VALIDACION
@@ -53,7 +54,6 @@ void submenuConsultasCli ();
 void submenuModificaCli ();
 void submenuMuestra();
 
-
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
 void cargaClienteArchivo ();
@@ -63,16 +63,24 @@ void muestraUnCliente(stCliente c);/// modificar para gotoxy;
 void muestraClienteArchivo();
 void muestraClienteArchivoActivo();
 void muestraClienteArchivoBaja();
+int arch2ArrayClienteArchivoActivo(stCliente a[],int v);
+int arch2ArrayClienteArchivoBaja(stCliente a[],int v);
+int arch2ArrayClienteArchivo(stCliente a[], int v);
+void muestraClientesArreglo(stCliente a[],int v);
+int buscaPosMenorId(stCliente a[],int v, int c);
+void ordenaSeleccionId(stCliente a[],int v);
+int buscaPosMenorNombre(stCliente a[],int v, int c);
+void ordenaSeleccionNombre(stCliente a[],int v);
 
 //******** PROTOTIPADO PERSISTENCIA EN ARCHIVO
 void guardaClienteArchivo (stCliente c);
 
 //******** PROTOTIPADO FUNCIONES COMPLEMENTARIAS DE ARCHIVO
 int buscaUltimoId();  /// BUSCA EL ULTIMO ID CARGADO EN EL ARCHIVO.
+int buscaUltimoNroCliente();
 
 //******** PROTOTIPADO FUNCIONES VALIDACION
 int validarNumero(char numero[]);
-int validaCliente(int nroCli);
 
 
 //******** PROTOTIPADO FUNCIONES BUSQUEDA
@@ -95,17 +103,37 @@ void modificaClienteDomicilio(int id, char domicilio [ ]);
 void modificaClienteMovil(int id, char movil [ ]);
 void modificaBajaCliente(int baja);
 
+//******** PROTOTIPADO FUNCIONES CARGA CLIENTE ALEATORIO
+
+int randomRango(int min, int max);
+int getNroMatricula();
+void getNombre(char n[]);
+void getApellido(char a[]);
+int getDNI();
+void getMovil(char movil[]);
+void getCalle(char c[]);
+void getEmail(char nombre[],char apellido[],char email[]);
+stCliente cargoClientesRandom();
+int cargaClientesAleatorios( stCliente a[],int v,int dim,int clientesDeseados);
+void Array2Archivo(stCliente a[],int v);
 
 
 
+/// prototipado de consumos, acomodar
 
-
-
+stConsumos cargaUnConsumo();
+stConsumos fecha ();
+void muestraUnConusmo(stConsumos consu);
+void guardaConsumoEnArchivo (stConsumos consu);
+void cargaConsumoArchivo ();
+void muestraConsumoArchivo();
 
 
 int main()
 {
+    srand(time(NULL));
     stCliente c,consulta,modifica;
+    stConsumos consumo;
 
 
     ///****  varibles de los switch *****///
@@ -120,6 +148,7 @@ int main()
     ///***   Varibles usadas en los llamados de las funciones   ***///
     int opcionConsultaCli=0;
     int opcionModificaCli=0;
+    int opcionMuestraCli=0;
 
     printtest(); /// MENSAJE DE INICIO
     Sleep(1500); /// el tiempo que demora el mensaje en pantalla
@@ -142,8 +171,13 @@ int main()
     char domicilioModifica[45];
     char movilModifica[45];
     int varEmail=0; /// Para tomar lo que retorna la funcion de valida email.
-    int opcionMuestraCli=0; // Variable usada en el menu de muestra
 
+    ///*** Variable usadas para funciones de muestra
+    stCliente cliMuestra[DIM_CLI];
+    int vCliMuestra=0;
+
+
+    int CliDeseados;
 
     do
     {
@@ -440,7 +474,7 @@ int main()
 
 
                 case 5:
-                   do
+                    do
                     {
                         system("cls");
                         submenuMuestra();
@@ -449,20 +483,30 @@ int main()
                         color(7);
                         scanf("%d",&opcionMuestraCli);
                         system("cls");
+                        vCliMuestra=0; /// validos clientes muestra
                         switch(opcionMuestraCli)
                         {
                         case 1:
-                            muestraClienteArchivo();
+                            vCliMuestra = arch2ArrayClienteArchivo(cliMuestra,vCliMuestra);
+                            ordenaSeleccionNombre(cliMuestra,vCliMuestra);
+                            muestraClientesArreglo(cliMuestra,vCliMuestra);
+
                             system("pause");
                             break;
 
                         case 2:
-                            muestraClienteArchivoActivo();
+                            vCliMuestra= arch2ArrayClienteArchivoActivo(cliMuestra,vCliMuestra);
+                            ordenaSeleccionNombre(cliMuestra,vCliMuestra);
+                            muestraClientesArreglo(cliMuestra,vCliMuestra);
+
                             system("pause");
                             break;
 
                         case 3:
-                            muestraClienteArchivoBaja();
+                            vCliMuestra=arch2ArrayClienteArchivoBaja(cliMuestra,vCliMuestra);
+                            ordenaSeleccionNombre(cliMuestra,vCliMuestra);
+                            muestraClientesArreglo(cliMuestra,vCliMuestra);
+
                             system("pause");
                             break;
 
@@ -475,8 +519,14 @@ int main()
                     while(opcionMuestraCli!=0);
                     system("pause");
                     break;
-
-
+                    /**
+                        case 6:
+                            vCliMuestra=0;
+                            printf("Ingrese la cantidad de clientes que desee crear\n");
+                            scanf("%d",&CliDeseados);
+                            vCliMuestra=cargaClientesAleatorios(cliMuestra,vCliMuestra,DIM_CLI,CliDeseados);
+                            Array2Archivo(cliMuestra,vCliMuestra);
+                            break;**/
                 }
 
 
@@ -485,10 +535,15 @@ int main()
             break;
 
         case 2:
+
+            printf("\nIngrese el Nro de Cliente...");
+
+            /// Modificar luego
+            getch();
             do
             {
                 system("cls");
-                submenuCli ();
+                submenuConsu();
                 color(9);
                 printf("Opcion: ");
                 color(7);
@@ -502,7 +557,8 @@ int main()
 
 
                 case 1:
-                    printf("\n Submenu de alta");
+                    cargaConsumoArchivo();
+
                     break;
 
                 case 2:
@@ -523,7 +579,8 @@ int main()
 
 
                 case 5:
-                    printf("\n Submenu de Listado");
+                    muestraConsumoArchivo();
+                    system("pause");
                     break;
 
 
@@ -622,9 +679,11 @@ void submenuCli ()
     printf("[4].- Consulta ");
     gotoxy(30,9);
     printf("[5].- Listado Clientes");
-    gotoxy(30,10);
+    ///gotoxy(30,10);
+    ///printf("[6].- Crea clientes aleatorios");
+    gotoxy(30,11);
     printf("0-Salir");
-    gotoxy(45,10);
+    gotoxy(45,11);
 }
 
 
@@ -716,31 +775,23 @@ void submenuModificaCli ()
 
 }
 
-
-
-/**************************************************************
-*
-* \brief funcion que muestra el Submenu de muestra
-*
-**************************************************************/
 void submenuMuestra()
-{    color(3);
+{
+
+    color(3);
     gotoxy(35,3);
     printf("Submenu de Listado");
     color(7);
     gotoxy(30,5);
-    printf("[1].- Muestra Listado Completo");
+    printf("[1].- Muestra listado completo");
     gotoxy(30,6);
-    printf("[2].- Muestra Listado de Clientes de Alta");
+    printf("[2].- Muestra listado de clientes de alta");
     gotoxy(30,7);
-    printf("[3].- Muestra Listado de Clientes de Baja");
+    printf("[3].- Muestra listado de clientes de baja");
     gotoxy(30,8);
     printf("0-Salir");
     gotoxy(45,8);
 }
-
-
-
 
 /************************************************************************//**
 *
@@ -757,11 +808,10 @@ stCliente cargaUnCliente()
         gotoxy(3,3);
         printf("Ingrese el nro de Cliente..........: ");
         scanf("%d",&c.nroCliente);
-        mensajeNroCliError(validaCliente(c.nroCliente));
 
 
     }
-    while(validaCliente(c.nroCliente)==1);
+    while(c.nroCliente<0 || c.nroCliente>9999999);
     gotoxy(3,5);
     printf("Ingrese el Nombre..................: ");
     fflush(stdin);
@@ -803,7 +853,7 @@ stCliente cargaUnCliente()
 ***************************************************************************/
 void guardaClienteArchivo (stCliente c)
 {
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"ab");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"ab");
     if(pArchCliente)
     {
         fwrite(&c,sizeof(stCliente),1,pArchCliente);
@@ -854,10 +904,19 @@ void muestraUnCliente(stCliente c) /// modificar para gotoxy
     printf("\n  Calle...................: %s", c.domicilio);
     printf("\n  Nro de Celular..........: %s", c.movil);
     printf("\n  Baja s/n................: %s", (c.baja)?"SI":"NO");
-
+    printf("\n  -----------------------------------------------------------------");
+    printf("\n");
 }
 
-
+void muestraClientesArreglo(stCliente a[],int v)
+{
+    int i=0;
+    while(i<v)
+    {
+        muestraUnCliente(a[i]);
+        i++;
+    }
+}
 
 /************************************************************************//**
 *
@@ -867,7 +926,7 @@ void muestraUnCliente(stCliente c) /// modificar para gotoxy
 void muestraClienteArchivo()
 {
     stCliente c;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
@@ -879,6 +938,26 @@ void muestraClienteArchivo()
     }
 }
 
+/************************************************************************//**
+*
+* \brief funcion que pasa todos los clientes de un archivo a un arreglo
+*
+***************************************************************************/
+int arch2ArrayClienteArchivo(stCliente a[], int v)
+{
+    stCliente c;
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
+    if(pArchCliente)
+    {
+        while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            a[v]=c;
+            v++;
+        }
+        fclose(pArchCliente);
+    }
+    return v;
+}
 
 /************************************************************************//**
 *
@@ -894,25 +973,6 @@ void mensajeEmailError (int dato)
     {
         gotoxy(3,13);
         printf("Ingresar Un Email Valido..");
-    }
-}
-
-
-/************************************************************************//**
-*
-* \brief funcion que muestra un error si el email es incorrecto
-* \param un entero que es devuelto de la funcion de validar email
-*
-***************************************************************************/
-void mensajeNroCliError (int dato)
-{
-    stCliente c;
-
-    if(!validaCliente(c.nroCliente)== dato)
-    {
-        gotoxy(3,13);
-        printf("Nro Cliente Ya existente...");
-
     }
 }
 
@@ -944,38 +1004,6 @@ int validaEmail(char email[])
 
 /************************************************************************//**
 *
-* \brief funcion que valida un cliente, verificar si existe o no en el archivo
-* \param nroCliente (int)
-* \return flag donde 0 si No es existe y 1 Si existe
-*
-***************************************************************************/
-int validaCliente(int nroCli)
-{
-    int i=0;
-    int flag=0;
-    stCliente c;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
-    if(pArchCliente)
-    {
-        while(flag==0 && fread(&c,sizeof(stCliente),1,pArchCliente)>0)
-        {
-
-            if(c.nroCliente == nroCli)
-            {
-                flag=1;
-            }
-        }
-        fclose(pArchCliente);
-
-    }
-
-
-    return flag;
-}
-
-
-/************************************************************************//**
-*
 * \brief funcion que muestra busca el ultimo Id ingresado en el Archivo
 * \return devuelve el ultimo ID del archivo
 *
@@ -984,7 +1012,7 @@ int buscaUltimoId()
 {
     stCliente c;
     int id=-1;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         fseek(pArchCliente, sizeof(stCliente)*(-1),SEEK_END);
@@ -997,6 +1025,28 @@ int buscaUltimoId()
     return id;
 }
 
+/************************************************************************//**
+*
+* \brief funcion que muestra busca el ultimo Nro de Clietne ingresado en el Archivo
+* \return devuelve el ultimo ID del archivo
+*
+***************************************************************************/
+int buscaUltimoNroCliente()
+{
+    stCliente c;
+    int NroCliente=-1;
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
+    if(pArchCliente)
+    {
+        fseek(pArchCliente, sizeof(stCliente)*(-1),SEEK_END);
+        if(fread(&c,sizeof(stCliente),1,pArchCliente) > 0)
+        {
+            NroCliente=c.nroCliente;
+        }
+        fclose(pArchCliente);
+    }
+    return NroCliente;
+}
 
 /************************************************************************//**
 *
@@ -1006,7 +1056,7 @@ int buscaUltimoId()
 void muestraClienteArchivoActivo()
 {
     stCliente c;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
@@ -1030,7 +1080,7 @@ void muestraClienteArchivoActivo()
 void muestraClienteArchivoBaja()
 {
     stCliente c;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
@@ -1045,6 +1095,63 @@ void muestraClienteArchivoBaja()
     }
 }
 
+/************************************************************************//**
+*
+* \brief funcion que pasa los clientes activos a un arreglo
+*\param Arreglo de clientes
+*\param validos
+*\return validos
+*
+***************************************************************************/
+int arch2ArrayClienteArchivoActivo(stCliente a[],int v)
+{
+    stCliente c;
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
+    if(pArchCliente)
+    {
+        while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.baja==0)
+            {
+                a[v]=c;
+                v++;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    return v;
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los clientes de baja a un arreglo
+*\param Arreglo de clientes
+*\param validos
+*\return validos
+*
+***************************************************************************/
+int arch2ArrayClienteArchivoBaja(stCliente a[],int v)
+{
+    stCliente c;
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
+    if(pArchCliente)
+    {
+        while(fread(&c,sizeof(stCliente),1,pArchCliente)>0)
+        {
+            if(c.baja==1)
+            {
+                a[v]=c;
+                v++;
+            }
+        }
+        fclose(pArchCliente);
+    }
+    return v;
+}
+
+
+
 
 /************************************************************************//**
 *
@@ -1057,7 +1164,7 @@ stCliente buscaUnClienteApellidoArchivo(char apellido[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1089,7 +1196,7 @@ stCliente buscaUnClienteNombreArchivo(char nombre[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1121,7 +1228,7 @@ stCliente buscaUnClienteDniArchivo(int dni)
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1153,7 +1260,7 @@ stCliente buscaUnClienteNroClienteArchivo(int nroCli)
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1185,7 +1292,7 @@ stCliente buscaUnClienteEmailArchivo(char email[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1217,7 +1324,7 @@ stCliente buscaUnClienteDomicilioArchivo(char domicilio[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1249,7 +1356,7 @@ stCliente buscaUnClienteMovilArchivo(char movil[])
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1281,7 +1388,7 @@ stCliente buscaUnClienteIdArchivo(int id)
 {
     stCliente c;
     int flag=0;
-    FILE *pArchCliente = fopen(ARCH_CLIENTE,"rb");
+    FILE *pArchCliente = fopen(AR_CLIENTE,"rb");
     if(pArchCliente)
     {
         while( flag == 0 && fread(&c, sizeof(stCliente), 1, pArchCliente) > 0)
@@ -1312,7 +1419,7 @@ stCliente buscaUnClienteIdArchivo(int id)
 void modificaClienteNroCliente(int id, int nroCli)
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1351,7 +1458,7 @@ void modificaClienteNroCliente(int id, int nroCli)
 void modificaClienteNombre(int id,char nombre[])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1391,7 +1498,7 @@ void modificaClienteNombre(int id,char nombre[])
 void modificaClienteApellido(int id,char apellido[])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1430,7 +1537,7 @@ void modificaClienteApellido(int id,char apellido[])
 void modificaClienteDni(int id, int dni)
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1469,7 +1576,7 @@ void modificaClienteDni(int id, int dni)
 void modificaClienteEmail(int id, char email [ ])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1510,7 +1617,7 @@ void modificaClienteEmail(int id, char email [ ])
 void modificaClienteDomicilio(int id, char domicilio [ ])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1549,7 +1656,7 @@ void modificaClienteDomicilio(int id, char domicilio [ ])
 void modificaClienteMovil(int id, char movil [ ])
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int flag =-1;
     int i=0;
 
@@ -1586,7 +1693,7 @@ void modificaClienteMovil(int id, char movil [ ])
 void modificaBajaCliente(int baja)
 {
     stCliente c;
-    FILE *pArchCliente=fopen(ARCH_CLIENTE,"r+b");
+    FILE *pArchCliente=fopen(AR_CLIENTE,"r+b");
     int pasaje=0;
     int flag =-1;
     int i=0;
@@ -1652,6 +1759,419 @@ void modificaBajaCliente(int baja)
         exit(1);
     }
 
+}
+
+int buscaPosMenorId(stCliente a[],int v, int c)
+{
+    int i=c;
+    int posMenor=i;
+    i++;
+    while(i<v)
+    {
+        if(a[i].id<a[posMenor].id)
+        {
+            posMenor=i;
+        }
+        i++;
+    }
+    return posMenor;
+}
+
+void ordenaSeleccionId(stCliente a[],int v)
+{
+    int poMenor=0;
+    int i=0;
+    stCliente aux;
+
+    while(i<v-1)
+    {
+        poMenor=buscaPosMenorId(a,v,i);
+        aux=a[poMenor];
+        a[poMenor]=a[i];
+        a[i]=aux;
+        i++;
+    }
+}
+
+int buscaPosMenorNombre(stCliente a[],int v, int c)
+{
+    int i=c;
+    int posMenor=i;
+    i++;
+    while(i<v)
+    {
+        if(strcmp(a[i].nombre,a[posMenor].nombre)<0)
+        {
+            posMenor=i;
+        }
+        i++;
+    }
+    return posMenor;
+}
+
+void ordenaSeleccionNombre(stCliente a[],int v)
+{
+    int poMenor=0;
+    int i=0;
+    stCliente aux;
+
+    while(i<v-1)
+    {
+        poMenor=buscaPosMenorNombre(a,v,i);
+        aux=a[poMenor];
+        a[poMenor]=a[i];
+        a[i]=aux;
+        i++;
+    }
+}
+
+/**
+----------------------------------------------------------------
+carga cliente aleatorio
+----------------------------------------------------------------
+*/
+
+
+int randomRango(int min, int max)
+{
+    return rand()%(max-min)+min;
+}
+
+
+
+int getNroMatricula()
+{
+    return randomRango(1,10000);
+}
+
+/*************************************************************//**
+*
+* \brief Funcion que asigna al string recibido un nombre al azar
+* \return void
+*
+*****************************************************************/
+void getNombre(char n[])
+{
+    char nombres[][30] = {"Ailin","Juan","Jeremias","Daniel","Fernando","Lautaro","Mailen","Jose",
+                          "Anastasio","Arturo","Mario","Tamaro","Adolfo","Pedro","Alfredo","Arnaldo",
+                          "Mauro","Benicio","Ildefonso","Cuchuflito","Remilgo","Miguel","Reinaldo"
+                         };
+
+    strcpy(n,nombres[randomRango(0,sizeof(nombres)/(sizeof(char)*30))]);
+}
+
+void getApellido(char a[])
+{
+    char apellidos[][30] = {"Gomez","Perez","Roca","Latorre","Fernandez","Torquemada", "Marijuan", "Roca", "Mitre", "Rivadavia",
+                            "San Martin", "Alvarez", "Comizo", "Borges", "Zama", "Recato", "Olvido", "Gil", "Trapero", "Restinga",
+                            "De Antonio", "Ramirez", "Spinetta", "Cortez", "Gonzalez", "Andujar", "San Juan", "Bautista", "Anchorena", "Paso",
+                            "Gaboto","Vega","Vargas","Lloret","Linares","Suarez","Sierra","Amenabar","Blanco","White","Black"
+                           };
+
+    strcpy(a,apellidos[randomRango(0,sizeof(apellidos)/(sizeof(char)*30))]);
+}
+
+int getDNI()
+{
+    return randomRango(549,1982)* randomRango(549,19801);
+}
+
+void getMovil(char movil[])
+{
+    for(int i=0; i<9; i++)
+    {
+        movil[i]=randomRango(48,57);
+    }
+}
+
+
+void getCalle(char c[])
+{
+    char calles[][30] = {"San Juan","Funes","Gaboto","San Martin","Colon","Rivadavia", "Alsina", "Roca", "Mitre", "Belgrano",
+                         "Paso", "11 de Septiembre", "3 de Febrero", "Balcarce", "Libertad", "Magallanes", "Irala", "Ayolas", "Moreno", "Brown",
+                         "Bolivar", "Alberti", "Gascon", "La Rioja", "Catamarca", "Salta", "Jujuy", "XX de Septiembre", "14 de Julio", "Dorrego",
+                         "Hernandarias","Don Orione","Juramento","Lanzilota","Estrada","Tierra del Fuego","Mendoza","Chubut","Rio Negro","Misiones","Edison"
+                        };
+
+    strcpy(c,calles[randomRango(0,sizeof(calles)/(sizeof(char)*30))]);
+}
+
+void getEmail(char nombre[],char apellido[],char email[])
+{
+    email=strcat(strcat(nombre,64),apellido);
+}
+
+stCliente cargoClientesRandom()
+{
+    stCliente c;
+    c.baja=0;
+    c.id=buscaUltimoId()+1;
+    c.nroCliente=buscaUltimoNroCliente()+1;
+    getApellido(c.apellido);
+    getNombre(c.nombre);
+    c.dni=getDNI();
+    getCalle(c.domicilio);
+    getEmail(c.nombre,c.apellido,c.email);
+    getMovil(c.movil);
+    return c;
+}
+
+int cargaClientesAleatorios( stCliente a[],int v,int dim,int clientesDeseados)
+{
+
+    while(v<dim&&v<clientesDeseados)
+    {
+        a[v]=cargoClientesRandom();
+        v++;
+    }
+    return v;
+}
+
+
+void Array2Archivo(stCliente a[],int v)
+{
+    int i=0;
+    FILE * pArch=fopen(AR_CLIENTE,"ab");
+    if(pArch)
+    {
+        while(i<v)
+        {
+            fwrite(&a[i],sizeof(stCliente),1,pArch);
+            i++;
+        }
+        fclose(pArch);
+    }
+}
+
+/************************************************************************//**
+*
+* \brief funcion que muestra busca el ultimo Id ingresado en el Archivo de consumos
+* \return devuelve el ultimo ID del archivo
+*
+***************************************************************************/
+int buscaUltimoIdConsumo()
+{
+    stCliente c;
+    int id=-1;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        fseek(pArchConsumo, sizeof(stConsumos)*(-1),SEEK_END);
+        if(fread(&c,sizeof(stConsumos),1,pArchConsumo) > 0)
+        {
+            id=c.id;
+        }
+        fclose(pArchConsumo);
+    }
+    return id;
+}
+/************************************************************************//**
+*
+* \brief funcion que Carga un cliente
+* \return Retorna un cliente
+*
+***************************************************************************/
+stConsumos cargaUnConsumo()
+{
+    stConsumos consu;
+
+    gotoxy(3,5);
+    printf("\nIngrese el anio del consumo....");
+    scanf("%d",&consu.anio);
+
+    do
+    {
+        printf("\nIngrese el mes del consumo.....");
+        scanf("%d",&consu.mes);
+    }
+    while(consu.mes<1 || consu.mes>12);
+    if ( consu.mes >= 1 && consu.mes <= 12 )
+    {
+        switch ( consu.mes )
+        {
+        case  1 :
+        case  3 :
+        case  5 :
+        case  7 :
+        case  8 :
+        case 10 :
+        case 12 :
+            do
+            {
+                printf("\nIngrese el dia del Consumo.....");
+                scanf("%d",&consu.dia);
+            }
+            while(consu.dia<=1 && consu.dia>=31);
+            break;
+
+        case  4 :
+        case  6 :
+        case  9 :
+        case 11 :
+            do
+            {
+                printf("\nIngrese el dia del Consumo.....");
+                scanf("%d",&consu.dia);
+            }
+            while(consu.dia<=1 && consu.dia>=30);
+            break;
+
+        case  2 :
+            if( consu.anio % 4 == 0 && consu.anio % 100 != 0 || consu.anio % 400 == 0 )
+            {
+                if ( consu.dia >= 1 && consu.dia <= 29 )
+                {
+                    do
+                    {
+                        printf("\nIngrese el dia del Consumo.....");
+                        scanf("%d",&consu.dia);
+                    }
+                    while(consu.dia<=1 && consu.dia>=29);
+                }
+                else
+                {
+                    do
+                    {
+                        printf("\nIngrese el dia del Consumo.....");
+                        scanf("%d",&consu.dia);
+                    }
+                    while(consu.dia<=1 && consu.dia>=28);
+                }
+            }
+        }
+    }
+    printf("Ingrese sus consumos en MB.............");
+    scanf("%d",&consu.datosConsumidos);
+    consu.baja=0;
+    consu.id=buscaUltimoIdConsumo()+1;
+
+    return consu;
+}
+
+
+
+
+
+
+
+
+stConsumos fechaRandom ()
+{
+    stConsumos consu;
+    consu.anio=2020; // año de consumos...
+    consu.mes=randomRango(1,12);
+
+    if ( consu.mes >= 1 && consu.mes <= 12 )
+    {
+        switch ( consu.mes )
+        {
+        case  1 :
+        case  3 :
+        case  5 :
+        case  7 :
+        case  8 :
+        case 10 :
+        case 12 :
+            consu.dia= randomRango(1,31);
+            break;
+
+        case  4 :
+        case  6 :
+        case  9 :
+        case 11 :
+            consu.dia=randomRango(1,30);
+            break;
+
+        case  2 :
+            if( consu.anio % 4 == 0 && consu.anio % 100 != 0 || consu.anio % 400 == 0 )
+            {
+                if ( consu.dia >= 1 && consu.dia <= 29 )
+                {
+                    consu.dia=randomRango(1,29);
+                }
+                else
+                {
+                    consu.dia=randomRango(1,28);
+                }
+            }
+        }
+    }
+    return consu;
+}
+
+/************************************************************************//**
+*
+* \brief funcion que muestra un consumo
+* \param Estrucutura consumo
+*
+***************************************************************************/
+void muestraUnConusmo(stConsumos consu) /// modificar para gotoxy
+{
+    printf("\n  -----------------------------------------------------------------");
+    printf("\n  ID......................: %d", consu.id);
+    printf("\n  Nro de Cliente..........: %d", consu.idCliente);
+    printf("\n  Anio....................: %d", consu.anio);
+    printf("\n  Mes.....................: %d", consu.mes);
+    printf("\n  Dia.....................: %d", consu.dia);
+    printf("\n  Datos Consumidos........: %d", consu.datosConsumidos);
+    printf("\n  Baja s/n................: %s", (consu.baja)?"SI":"NO");
+    printf("\n  -----------------------------------------------------------------");
+    printf("\n");
+}
+
+/************************************************************************//**
+*
+* \brief funcion que persiste el dato cargador en un archivo.
+*
+***************************************************************************/
+void guardaConsumoEnArchivo (stConsumos consu)
+{
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"ab");
+    if(pArchConsumo)
+    {
+        fwrite(&consu,sizeof(stConsumos),1,pArchConsumo);
+        fclose(pArchConsumo);
+    }
+}
+
+/************************************************************************//**
+*
+* \brief funcion que Carga uno o mas clientes y los guarda en el Archivo
+*
+***************************************************************************/
+void cargaConsumoArchivo ()
+{
+    stConsumos consu;
+    char opcion =0;
+    while(opcion!=27)
+    {
+        system("cls");
+        printf("Sistema de Alta de Clientes...");
+        consu=cargaUnConsumo();
+        consu.id=buscaUltimoIdConsumo()+1;
+        guardaConsumoEnArchivo(consu);
+        printf("\nUltimo ID %d",consu.id);
+        system("pause");
+        printf("ESC para salir ");
+        opcion=getch();
+    }
+}
+
+void muestraConsumoArchivo()
+{
+    stConsumos consu;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&consu,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+
+        muestraUnConusmo(consu);
+
+        }
+        printf("\n");
+        fclose(pArchConsumo);
+    }
 }
 
 
