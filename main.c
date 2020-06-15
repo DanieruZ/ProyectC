@@ -28,6 +28,7 @@ typedef struct
 typedef struct
 {
     int id;  /// campo único y autoincremental
+    int nroConsumo; /// Se agrega este dato para que el cliente no sepa el ID y no intervenga sobre el mismo
     int idCliente;
     int anio;
     int mes; /// 1 a 12
@@ -38,6 +39,7 @@ typedef struct
 
 //******** PROTOTIPADO DE ACCESORIOS
 void printtest();
+void mensaje();
 
 //******** PROTOTIPADO DE ERRORES
 void mensajeEmailError (int dato);
@@ -53,6 +55,8 @@ void submenuConsu();
 void submenuConsultasCli ();
 void submenuModificaCli ();
 void submenuMuestra();
+void submenuMuestraConsumos();
+void submenuModificacionConsu();
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
@@ -104,7 +108,6 @@ void modificaClienteMovil(int id, char movil [ ]);
 void modificaBajaCliente(int baja);
 
 //******** PROTOTIPADO FUNCIONES CARGA CLIENTE ALEATORIO
-
 int randomRango(int min, int max);
 int getNroMatricula();
 void getNombre(char n[]);
@@ -117,16 +120,48 @@ stCliente cargoClientesRandom();
 int cargaClientesAleatorios( stCliente a[],int v,int dim,int clientesDeseados);
 void Array2Archivo(stCliente a[],int v);
 
-
-
-/// prototipado de consumos, acomodar
-
+//******** PROTOTIPADO FUNCIONES CARGA CONSUMO
 stConsumos cargaUnConsumo();
-stConsumos fecha ();
+void cargaConsumoArchivo (int idCliente);
+
+//******** PROTOTIPADO FUNCIONES MUESTRA CONSUMO
 void muestraUnConusmo(stConsumos consu);
-void guardaConsumoEnArchivo (stConsumos consu);
-void cargaConsumoArchivo ();
 void muestraConsumoArchivo();
+void muestraConsumosArreglo(stConsumos a[],int v);
+
+
+//******** PROTOTIPADO FUNCIONES ARCHIVO A ARREGLO CONSUMO
+int arch2ArrayConsumoArchivo(stConsumos a[], int v, int id);
+int arch2ArrayConsumoArchivoActivo(stConsumos a[],int v, int id);
+int arch2ArrayConsumoArchivoBaja(stConsumos a[],int v, int id);
+
+
+//******** PROTOTIPADO FUNCIONES ORDENAMIENTO X SELECCION CONSUMO
+int buscaPosMenorIdConsumo(stConsumos a[],int v, int c);
+void ordenaSeleccionIdConsumo(stConsumos a[],int v);
+
+
+//******** PROTOTIPADO FUNCIONES VARIAS CONSUMO
+stConsumos fecha ();
+void guardaConsumoEnArchivo (stConsumos consu);
+int buscaUltimoNroConsumo();
+
+//******** PROTOTIPADO FUNCIONES DE MODIFICACION CONSUMOS
+void modificaBajaConsumo(int baja);
+void modificaFechaCOnsumo(int nroConsumo, int anio, int mes, int dia);
+void modificaConsumosMB(int nroConsumo, int nuevoConsumo);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 int main()
@@ -176,8 +211,16 @@ int main()
     stCliente cliMuestra[DIM_CLI];
     int vCliMuestra=0;
 
-
+    ///*** Variables de consumidor
+    stConsumos muestraConsu[100];
+    int vConsu=0;
     int CliDeseados;
+
+    ///***Variable para menu de consumos
+    int opcionIngresoCOnsu=1;
+    int opcionMuestraConsu=0;
+    int opcionSubMenuModifica=0;
+
 
     do
     {
@@ -506,7 +549,6 @@ int main()
                             vCliMuestra=arch2ArrayClienteArchivoBaja(cliMuestra,vCliMuestra);
                             ordenaSeleccionNombre(cliMuestra,vCliMuestra);
                             muestraClientesArreglo(cliMuestra,vCliMuestra);
-
                             system("pause");
                             break;
 
@@ -535,11 +577,32 @@ int main()
             break;
 
         case 2:
+            color(9);
+            gotoxy(30,3);
+            printf("Sistema de Ingreso a Consumos");
+            color(7);
 
-            printf("\nIngrese el Nro de Cliente...");
+            while(opcionIngresoCOnsu != 0)
+            {
 
-            /// Modificar luego
-            getch();
+                gotoxy(10,6);
+                printf("Ingrese el Nro de Cliente: ");
+                scanf("%d",&c.nroCliente);
+                c=buscaUnClienteNroClienteArchivo(c.nroCliente);
+                gotoxy(10,8);
+                mensaje();
+                gotoxy(20,7);
+                muestraUnCliente(c);
+                gotoxy(2,20);
+                printf("[0] Correcto - [1] Incorrecto");
+                gotoxy(2,21);
+                printf("Opcion ");
+                scanf("%d",&opcionIngresoCOnsu);
+                system("cls");
+            }
+            opcionIngresoCOnsu=1; /// Para que cada vez que salga y vuelva a entra Pida nuevamente el nro de cliente
+
+
             do
             {
                 system("cls");
@@ -557,17 +620,61 @@ int main()
 
 
                 case 1:
-                    cargaConsumoArchivo();
+                    cargaConsumoArchivo(c.id);
 
                     break;
 
                 case 2:
-                    printf("\n Submenu de Baja");
+                    vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
+                    muestraConsumosArreglo(muestraConsu,vConsu);
+                    printf("Ingrese el Nro de Consumo a Eliminar: ");
+                    scanf("%d",&consumo.nroConsumo);
+                    modificaBajaConsumo(consumo.nroConsumo);
                     break;
 
 
                 case 3:
-                    printf("\n Submenu de Modificacion");
+
+                    do
+                    {
+                        system("cls");
+                        submenuModificacionConsu();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionSubMenuModifica);
+                        system("cls");
+                        switch(opcionSubMenuModifica)
+                        {
+                        case 1:
+
+                            vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            printf("Ingrese el Nro de Consumo a Modificar la Fecha: ");
+                            scanf("%d",&consumo.nroConsumo);
+                            printf("\n%d Nro consumo",consumo.nroConsumo);
+                            system("pause");
+                            modificaFechaCOnsumo(consumo.nroConsumo,consumo.anio,consumo.mes,consumo.dia);
+                            break;
+
+
+                        case 2:
+                            vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            printf("Ingrese el Nro de Consumo a Modificar la Fecha: ");
+                            scanf("%d",&consumo.nroConsumo);
+                            printf("Ingrese los nuevos Mb");
+                            scanf("%d",&consumo.datosConsumidos);
+                            modificaConsumosMB(consumo.nroConsumo,consumo.datosConsumidos);
+
+                            break;
+                        }
+
+
+
+
+                    }
+                    while(opcionSubMenuModifica !=0);
 
                     break;
 
@@ -579,7 +686,48 @@ int main()
 
 
                 case 5:
-                    muestraConsumoArchivo();
+                    do
+                    {
+                        system("cls");
+                        submenuMuestraConsumos();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionMuestraConsu);
+                        system("cls");
+                        vConsu=0; /// validos clientes muestra
+                        switch(opcionMuestraConsu)
+                        {
+                        case 1:
+
+                            vConsu=arch2ArrayConsumoArchivo(muestraConsu,vConsu,c.id);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+
+                            system("pause");
+                            break;
+
+                        case 2:
+                            vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+
+                            system("pause");
+                            break;
+
+                        case 3:
+                            vConsu=arch2ArrayConsumoArchivoBaja(muestraConsu,vConsu,c.id);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+
+                            system("pause");
+                            break;
+
+
+                        }
+
+
+
+                    }
+                    while(opcionMuestraConsu!=0);
+
                     system("pause");
                     break;
 
@@ -589,7 +737,7 @@ int main()
             while(opcionConsu!=0);
             break;
         }
-        system("pause");
+        // system("pause");
 
     }
     while(opcionPpal!=0);
@@ -629,6 +777,24 @@ void printtest()
     printf("\t\t  ######        #####                     ##                                   \n");
     color(7);
 
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que muestra un mensaje con delay
+*
+***************************************************************************/
+
+void mensaje()
+{
+    printf("Cargando Datos");
+    for(int i=0; i<10 ; i++)
+    {
+        printf(".");
+        Sleep(300);
+
+    }
 }
 
 
@@ -775,6 +941,12 @@ void submenuModificaCli ()
 
 }
 
+
+/**************************************************************
+*
+* \brief funcion de Submenu de muestras clientes
+*
+**************************************************************/
 void submenuMuestra()
 {
 
@@ -785,9 +957,55 @@ void submenuMuestra()
     gotoxy(30,5);
     printf("[1].- Muestra listado completo");
     gotoxy(30,6);
-    printf("[2].- Muestra listado de clientes de alta");
+    printf("[2].- Muestra listado de Clientes de alta");
     gotoxy(30,7);
-    printf("[3].- Muestra listado de clientes de baja");
+    printf("[3].- Muestra listado de Clientes de baja");
+    gotoxy(30,8);
+    printf("0-Salir");
+    gotoxy(45,8);
+}
+
+
+/**************************************************************
+*
+* \brief funcion de Submenu de modifica consumos
+*
+**************************************************************/
+void submenuModificacionConsu()
+{
+
+    color(3);
+    gotoxy(35,3);
+    printf("Submenu de Modificacion");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Modificar Fecha");
+    gotoxy(30,6);
+    printf("[2].- Modificar Consumos MB");
+    gotoxy(30,7);
+    printf(" 0-Volver");
+    gotoxy(45,8);
+}
+
+
+/**************************************************************
+*
+* \brief funcion de Submenu de muestras consumos
+*
+**************************************************************/
+void submenuMuestraConsumos()
+{
+
+    color(3);
+    gotoxy(35,3);
+    printf("Submenu de Listado");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Muestra listado completo");
+    gotoxy(30,6);
+    printf("[2].- Muestra listado de Consumos de alta");
+    gotoxy(30,7);
+    printf("[3].- Muestra listado de Consumos de baja");
     gotoxy(30,8);
     printf("0-Salir");
     gotoxy(45,8);
@@ -894,7 +1112,7 @@ void cargaClienteArchivo ()
 ***************************************************************************/
 void muestraUnCliente(stCliente c) /// modificar para gotoxy
 {
-    printf("\n  -----------------------------------------------------------------");
+    printf("\n  --------------------------------------------");
     printf("\n  ID......................: %d", c.id);
     printf("\n  Nro de Cliente..........: %d", c.nroCliente);
     printf("\n  Nombre..................: %s", c.nombre);
@@ -904,7 +1122,7 @@ void muestraUnCliente(stCliente c) /// modificar para gotoxy
     printf("\n  Calle...................: %s", c.domicilio);
     printf("\n  Nro de Celular..........: %s", c.movil);
     printf("\n  Baja s/n................: %s", (c.baja)?"SI":"NO");
-    printf("\n  -----------------------------------------------------------------");
+    printf("\n  --------------------------------------------");
     printf("\n");
 }
 
@@ -1761,6 +1979,16 @@ void modificaBajaCliente(int baja)
 
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca la menor posicion del menor id
+* \param Arreglo de cliente
+* \param validos
+* \param posicion
+* \return posicion del menor id
+*
+***************************************************************************/
 int buscaPosMenorId(stCliente a[],int v, int c)
 {
     int i=c;
@@ -1777,6 +2005,14 @@ int buscaPosMenorId(stCliente a[],int v, int c)
     return posMenor;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que ordena por seleccion los Id de los clientes
+* \param Arreglo de clientes
+* \param validos
+*
+***************************************************************************/
 void ordenaSeleccionId(stCliente a[],int v)
 {
     int poMenor=0;
@@ -1793,6 +2029,16 @@ void ordenaSeleccionId(stCliente a[],int v)
     }
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que busca la posicion del nombre menor en el arreglo
+* \param Arreglo de clientes
+* \param validos
+* \param posicion
+* \return posicion del nombre menor
+*
+***************************************************************************/
 int buscaPosMenorNombre(stCliente a[],int v, int c)
 {
     int i=c;
@@ -1809,6 +2055,14 @@ int buscaPosMenorNombre(stCliente a[],int v, int c)
     return posMenor;
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que ordena por seleccion los nombres
+* \param Arreglo de clientes
+* \param validos
+*
+***************************************************************************/
 void ordenaSeleccionNombre(stCliente a[],int v)
 {
     int poMenor=0;
@@ -1928,6 +2182,13 @@ int cargaClientesAleatorios( stCliente a[],int v,int dim,int clientesDeseados)
 }
 
 
+/************************************************************************//**
+*
+* \brief funcion que pasa los datos del arreglo al archivo
+* \param Arreglo de cliente
+* \param validos
+*
+***************************************************************************/
 void Array2Archivo(stCliente a[],int v)
 {
     int i=0;
@@ -1943,6 +2204,7 @@ void Array2Archivo(stCliente a[],int v)
     }
 }
 
+
 /************************************************************************//**
 *
 * \brief funcion que muestra busca el ultimo Id ingresado en el Archivo de consumos
@@ -1951,7 +2213,7 @@ void Array2Archivo(stCliente a[],int v)
 ***************************************************************************/
 int buscaUltimoIdConsumo()
 {
-    stCliente c;
+    stConsumos c;
     int id=-1;
     FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
     if(pArchConsumo)
@@ -1965,6 +2227,33 @@ int buscaUltimoIdConsumo()
     }
     return id;
 }
+
+
+/************************************************************************//**
+*
+* \brief funcion que muestra busca el ultimo nro de consumo ingresado en el Archivo de consumos
+* \return devuelve el ultimo ID del archivo
+*
+***************************************************************************/
+int buscaUltimoNroConsumo()
+{
+    stConsumos c;
+    int id=-1;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        fseek(pArchConsumo, sizeof(stConsumos)*(-1),SEEK_END);
+        if(fread(&c,sizeof(stConsumos),1,pArchConsumo) > 0)
+        {
+            id=c.nroConsumo;
+        }
+        fclose(pArchConsumo);
+    }
+    return id;
+}
+
+
+
 /************************************************************************//**
 *
 * \brief funcion que Carga un cliente
@@ -1976,12 +2265,13 @@ stConsumos cargaUnConsumo()
     stConsumos consu;
 
     gotoxy(3,5);
-    printf("\nIngrese el anio del consumo....");
+    printf("Ingrese el anio del consumo....");
     scanf("%d",&consu.anio);
 
     do
     {
-        printf("\nIngrese el mes del consumo.....");
+        gotoxy(3,6);
+        printf("Ingrese el mes del consumo.....");
         scanf("%d",&consu.mes);
     }
     while(consu.mes<1 || consu.mes>12);
@@ -1998,7 +2288,8 @@ stConsumos cargaUnConsumo()
         case 12 :
             do
             {
-                printf("\nIngrese el dia del Consumo.....");
+                gotoxy(3,7);
+                printf("Ingrese el dia del Consumo.....");
                 scanf("%d",&consu.dia);
             }
             while(consu.dia<=1 && consu.dia>=31);
@@ -2010,7 +2301,8 @@ stConsumos cargaUnConsumo()
         case 11 :
             do
             {
-                printf("\nIngrese el dia del Consumo.....");
+                gotoxy(3,8);
+                printf("Ingrese el dia del Consumo.....");
                 scanf("%d",&consu.dia);
             }
             while(consu.dia<=1 && consu.dia>=30);
@@ -2023,6 +2315,7 @@ stConsumos cargaUnConsumo()
                 {
                     do
                     {
+                        gotoxy(3,9);
                         printf("\nIngrese el dia del Consumo.....");
                         scanf("%d",&consu.dia);
                     }
@@ -2040,10 +2333,13 @@ stConsumos cargaUnConsumo()
             }
         }
     }
+    gotoxy(3,10);
     printf("Ingrese sus consumos en MB.............");
     scanf("%d",&consu.datosConsumidos);
     consu.baja=0;
+    consu.nroConsumo=buscaUltimoNroConsumo()+1;
     consu.id=buscaUltimoIdConsumo()+1;
+
 
     return consu;
 }
@@ -2099,6 +2395,7 @@ stConsumos fechaRandom ()
     return consu;
 }
 
+
 /************************************************************************//**
 *
 * \brief funcion que muestra un consumo
@@ -2108,8 +2405,9 @@ stConsumos fechaRandom ()
 void muestraUnConusmo(stConsumos consu) /// modificar para gotoxy
 {
     printf("\n  -----------------------------------------------------------------");
-    printf("\n  ID......................: %d", consu.id);
-    printf("\n  Nro de Cliente..........: %d", consu.idCliente);
+    printf("\n  ID CLIENTE..............: %d", consu.idCliente);
+    printf("\n  ID CONSUMO..............: %d", consu.id);
+    printf("\n  Nro CONSUMO.............: %d", consu.nroConsumo);
     printf("\n  Anio....................: %d", consu.anio);
     printf("\n  Mes.....................: %d", consu.mes);
     printf("\n  Dia.....................: %d", consu.dia);
@@ -2118,6 +2416,7 @@ void muestraUnConusmo(stConsumos consu) /// modificar para gotoxy
     printf("\n  -----------------------------------------------------------------");
     printf("\n");
 }
+
 
 /************************************************************************//**
 *
@@ -2134,12 +2433,14 @@ void guardaConsumoEnArchivo (stConsumos consu)
     }
 }
 
+
 /************************************************************************//**
 *
-* \brief funcion que Carga uno o mas clientes y los guarda en el Archivo
+* \brief funcion que Carga uno o mas consumos y los guarda en el Archivo
+* \param id del cliente
 *
 ***************************************************************************/
-void cargaConsumoArchivo ()
+void cargaConsumoArchivo (int idCliente)
 {
     stConsumos consu;
     char opcion =0;
@@ -2148,15 +2449,24 @@ void cargaConsumoArchivo ()
         system("cls");
         printf("Sistema de Alta de Clientes...");
         consu=cargaUnConsumo();
+        consu.idCliente=idCliente;
+        consu.nroConsumo=buscaUltimoNroConsumo()+1;
         consu.id=buscaUltimoIdConsumo()+1;
         guardaConsumoEnArchivo(consu);
-        printf("\nUltimo ID %d",consu.id);
+        printf("\nId consumo %d",consu.nroConsumo);
         system("pause");
+        muestraUnConusmo(consu);
         printf("ESC para salir ");
         opcion=getch();
     }
 }
 
+
+/************************************************************************//**
+*
+* \brief funcion que muestra todos los consumos del archivo
+*
+***************************************************************************/
 void muestraConsumoArchivo()
 {
     stConsumos consu;
@@ -2166,7 +2476,7 @@ void muestraConsumoArchivo()
         while(fread(&consu,sizeof(stConsumos),1,pArchConsumo)>0)
         {
 
-        muestraUnConusmo(consu);
+            muestraUnConusmo(consu);
 
         }
         printf("\n");
@@ -2175,4 +2485,393 @@ void muestraConsumoArchivo()
 }
 
 
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
 
+int arch2ArrayConsumoArchivo(stConsumos a[], int v, int id)
+{
+    stConsumos c;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+            if(c.idCliente==id)
+            {
+                a[v]=c;
+                v++;
+            }
+
+        }
+        fclose(pArchConsumo);
+    }
+    return v;
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que busca la posicion del menor consumo
+* \param Arreglo de consumos
+* \param validos
+* \param posicion
+* \return posicion del menor consumo
+*
+***************************************************************************/
+int buscaPosMenorIdConsumo(stConsumos a[],int v, int c)
+{
+    int i=c;
+    int posMenor=i;
+    i++;
+    while(i<v)
+    {
+        if(a[i].id<a[posMenor].id)
+        {
+            posMenor=i;
+        }
+        i++;
+    }
+    return posMenor;
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que ordena por seleccion el arreglo de consumos
+* \param Arreglo de consumos
+* \param validos
+*
+***************************************************************************/
+void ordenaSeleccionIdConsumo(stConsumos a[],int v)
+{
+    int poMenor=0;
+    int i=0;
+    stConsumos aux;
+
+    while(i<v-1)
+    {
+        poMenor=buscaPosMenorId(a,v,i);
+        aux=a[poMenor];
+        a[poMenor]=a[i];
+        a[i]=aux;
+        i++;
+    }
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos que estan activos del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
+int arch2ArrayConsumoArchivoActivo(stConsumos a[],int v, int id)
+{
+    stConsumos c;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+            if(c.baja==0&&c.idCliente==id)
+            {
+                a[v]=c;
+                v++;
+            }
+        }
+        fclose(pArchConsumo);
+    }
+    return v;
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos con id dados de baja de un cliente del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
+int arch2ArrayConsumoArchivoBaja(stConsumos a[],int v,int id)
+{
+    stConsumos c;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+            if(c.baja==1&&c.idCliente==id)
+            {
+                a[v]=c;
+                v++;
+            }
+        }
+        fclose(pArchConsumo);
+    }
+    return v;
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que recorre el arreglo y llama a la funcion que muestra un consumo
+* \param Arreglo de consumos
+* \param validos
+*
+***************************************************************************/
+void muestraConsumosArreglo(stConsumos a[],int v)
+{
+    int i=0;
+    while(i<v)
+    {
+        muestraUnConusmo(a[i]);
+        i++;
+    }
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el campo de baja de un consumo 0 activo / 1 inactivo y lo guarda en el archivo
+* \param baja(int) seria el id
+*
+**********************************************************************************/
+void modificaBajaConsumo(int baja)
+{
+    stConsumos c;
+    FILE *pArchConsumo=fopen(AR_CONSUMO,"r+b");
+    int pasaje=0;
+    int flag =-1;
+    int i=0;
+    if(pArchConsumo!=NULL)
+    {
+        while(flag==-1 && fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+
+
+            if(c.nroConsumo==baja)
+            {
+                flag=i;
+            }
+            i++;
+        }
+        if(flag!=-1)
+        {
+            printf("\nEl Nro de Consumo %d",baja);
+            if(c.baja==0)
+            {
+                printf("\n****Consumo Activo**** \n");
+            }
+            else
+            {
+                printf("\n****Consumo Inactivo**** \n");
+            }
+            printf("\nPresione [1] para Desactivar y [0] Para activar: ");
+            scanf("%d", &pasaje);
+
+            if(pasaje==1)
+            {
+                c.baja=1;
+                fseek(pArchConsumo,sizeof(stConsumos)*(i-1),SEEK_SET);
+                if(fwrite(&c,sizeof(stConsumos),1,pArchConsumo)==1)
+                {
+                    printf("El Consumo se actualizo Correctamente!!\n");
+                    muestraUnConusmo(c);
+                    system("pause");
+                    fclose(pArchConsumo);
+                }
+            }
+            else
+            {
+                c.baja=0;
+                fseek(pArchConsumo,sizeof(stConsumos)*(i-1),SEEK_SET);
+                if(fwrite(&c,sizeof(stConsumos),1,pArchConsumo)==1)
+                {
+                    printf("El Consumo se actualizo Correctamente!!\n");
+                    muestraUnConusmo(c);
+                    system("pause");
+                    fclose(pArchConsumo);
+                }
+            }
+        }
+        else
+        {
+            printf("No se encuentra Nro de Cliente \n");
+        }
+
+    }
+    else
+    {
+        exit(1);
+    }
+
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que modificar la fecha de consumo
+* \param nro de consumo
+* \param anio
+* \param mes
+* \param dia
+*
+**********************************************************************************/
+void modificaFechaCOnsumo(int nroConsumo, int anio, int mes, int dia)
+{
+    stConsumos consu;
+    int flag=-1;
+    int i=0;
+
+    FILE *pArchConsumos = fopen(AR_CONSUMO,"r+b");
+    if(pArchConsumos)
+    {
+        while(flag==-1 && fread(&consu,sizeof(stConsumos),1,pArchConsumos)>0)
+        {
+            if(consu.nroConsumo==nroConsumo)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+
+        if(flag!=-1)
+        {
+
+            printf("\nIngrese el anio del consumo....");
+            scanf("%d",&anio);
+
+            do
+            {
+                printf("\nIngrese el mes del consumo.....");
+                scanf("%d",&mes);
+
+            }
+            while(mes<1 || mes>12);
+            if ( mes >= 1 && mes <= 12 )
+            {
+                switch ( mes )
+                {
+                case  1 :
+                case  3 :
+                case  5 :
+                case  7 :
+                case  8 :
+                case 10 :
+                case 12 :
+                    do
+                    {
+                        printf("\nIngrese el dia del Consumo.....");
+                        scanf("%d",&dia);
+                    }
+                    while(dia<=1 && dia>=31);
+                    break;
+
+                case  4 :
+                case  6 :
+                case  9 :
+                case 11 :
+                    do
+                    {
+                        printf("\nIngrese el dia del Consumo.....");
+                        scanf("%d",&dia);
+                    }
+                    while(dia<=1 && dia>=30);
+                    break;
+
+                case  2 :
+                    if( anio % 4 == 0 && anio % 100 != 0 || anio % 400 == 0 )
+                    {
+                        if ( dia >= 1 && dia <= 29 )
+                        {
+                            do
+                            {
+                                printf("\nIngrese el dia del Consumo.....");
+                                scanf("%d",&dia);
+                            }
+                            while(dia<=1 && dia>=29);
+                        }
+                        else
+                        {
+                            do
+                            {
+                                printf("\nIngrese el dia del Consumo.....");
+                                scanf("%d",&dia);
+                            }
+                            while(dia<=1 && dia>=28);
+
+
+                        }
+                    }
+                }
+            }
+            consu.anio=anio;
+            consu.mes=mes;
+            consu.dia=dia;
+            fseek(pArchConsumos,sizeof(stConsumos)*(i-1),SEEK_SET);
+            if(fwrite(&consu,sizeof(stConsumos),1,pArchConsumos)==1)
+            {
+                printf("El Cliente se actualizo Correctamente!!\n");
+                muestraUnConusmo(consu);
+                system("pause");
+                fclose(pArchConsumos);
+            }
+        }/// fin if flag !=1
+        else
+        {
+            printf("Consumo No Registrado...");
+            system("pause");
+        }
+    }
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que modificar el consumo en mb
+* \param nro de consumo
+* \param consumo nuevo
+*
+**********************************************************************************/
+void modificaConsumosMB(int nroConsumo, int nuevoConsumo)
+{
+    stConsumos c;
+    FILE *pArchConsumo=fopen(AR_CONSUMO,"r+b");
+    int flag =-1;
+    int i=0;
+
+    if(pArchConsumo)
+    {
+        while(flag==-1 && fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+            if(c.nroConsumo==nroConsumo)
+            {
+                flag=i;
+            }
+            i++;
+        }
+
+        c.datosConsumidos=nuevoConsumo;
+        fseek(pArchConsumo,sizeof(stConsumos)*(i-1),SEEK_SET);
+        if(fwrite(&c,sizeof(stConsumos),1,pArchConsumo)==1)
+        {
+            printf("El Cliente se actualizo Correctamente!!\n");
+            muestraUnConusmo(c);
+            system("pause");
+            fclose(pArchConsumo);
+        }
+    }
+}
