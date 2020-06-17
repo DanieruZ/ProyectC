@@ -57,6 +57,7 @@ void submenuModificaCli ();
 void submenuMuestra();
 void submenuMuestraConsumos();
 void submenuModificacionConsu();
+void submenuMuestraConsumosenMb();
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
@@ -146,15 +147,18 @@ stConsumos fecha ();
 void guardaConsumoEnArchivo (stConsumos consu);
 int buscaUltimoNroConsumo();
 
+
 //******** PROTOTIPADO FUNCIONES DE MODIFICACION CONSUMOS
 void modificaBajaConsumo(int baja);
 void modificaFechaCOnsumo(int nroConsumo, int anio, int mes, int dia);
 void modificaConsumosMB(int nroConsumo, int nuevoConsumo);
 
 
-
-
-
+//******** PROTOTIPADO FUNCIONES CONSULTA CONSUMDOS
+int archivoaMatrizConsumo (int dia,int mes,stConsumos consu[dia][mes],int cuenta[],int vCuenta);
+void muestraTotalConsumos (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta);
+void muestraConsumoxMes (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta);
+int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int vConsumidos);
 
 
 
@@ -220,8 +224,14 @@ int main()
     int opcionIngresoCOnsu=1;
     int opcionMuestraConsu=0;
     int opcionSubMenuModifica=0;
+    int opcionMuestraConsuenMB=0;
 
 
+    stConsumos mConsumos[32][13];
+    stConsumos aConsumos[13];
+    int vMConsu=0;
+    int mesConsumido=0;
+    int vConsumidos =0;
     do
     {
         color(7);
@@ -680,8 +690,49 @@ int main()
 
 
                 case 4:
+
+                    do
+
+                    {
+                        system("cls");
+                        submenuMuestraConsumosenMb();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionMuestraConsuenMB);
+                        system("cls");
+                        switch(opcionMuestraConsuenMB)
+                        {
+                        case 1:
+
+                            vMConsu=archivoaMatrizConsumo(32,13,mConsumos,aConsumos,vMConsu);
+                            muestraTotalConsumos(32,13,mConsumos,aConsumos,vMConsu);
+                            vConsumidos= datosConsumidosTotal (32,13,mConsumos,vConsumidos);
+                            printf("\nDatos consumidos %d MB\n\n\n",vConsumidos);
+                            break;
+
+
+                        case 2:
+                            printf("\nIngrese El Mes para ver los consumos: ");
+                            scanf("%d",&mesConsumido);
+                            vMConsu=archivoaMatrizConsumo(32,mesConsumido,mConsumos,aConsumos,vMConsu);
+                            muestraConsumoxMes(32,mesConsumido,mConsumos,aConsumos,vMConsu);
+
+                            break;
+
+                        case 3:
+
+                            system("pause");
+                            break;
+                        }
+                        system("pause");
+
+                    }
+                    while(opcionMuestraConsuenMB!=0);
                     printf("\n Submenu de Consulta");
 
+
+                    system("pause");
                     break;
 
 
@@ -715,7 +766,15 @@ int main()
 
                         case 3:
                             vConsu=arch2ArrayConsumoArchivoBaja(muestraConsu,vConsu,c.id);
-                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            if(vConsu)
+                            {
+                                printf("\nNo Hay Registro de datos Consumidos para el Periodo...");
+                            }
+                            else
+                            {
+                                muestraConsumosArreglo(muestraConsu,vConsu);
+                            }
+
 
                             system("pause");
                             break;
@@ -1007,6 +1066,28 @@ void submenuMuestraConsumos()
     gotoxy(30,7);
     printf("[3].- Muestra listado de Consumos de baja");
     gotoxy(30,8);
+    printf("0-Salir");
+    gotoxy(45,8);
+}
+
+
+/**************************************************************
+*
+* \brief funcion de Submenu de muestras consumos en MB
+*
+**************************************************************/
+void submenuMuestraConsumosenMb()
+{
+
+    color(3);
+    gotoxy(35,3);
+    printf("Submenu de Listado");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Muestra Total de consumos Mensuales");
+    gotoxy(30,6);
+    printf("[2].- Muestra Consumos por Mes");
+    gotoxy(30,7);
     printf("0-Salir");
     gotoxy(45,8);
 }
@@ -2875,3 +2956,150 @@ void modificaConsumosMB(int nroConsumo, int nuevoConsumo)
         }
     }
 }
+
+
+/************************************************************************//********
+*
+* \brief funcion que pasa los consumos a una matriz de estructura
+* \param dia
+* \param mes
+* \param estructura Consumo
+* \param validos consumos
+* \param arreglo cuenta los meses que levan datos
+* \param validos
+* \return validos
+*
+**********************************************************************************/
+int archivoaMatrizConsumo (int dia,int mes,stConsumos consu[dia][mes],int cuenta[],int vCuenta)
+{
+    stConsumos c;
+
+    FILE * pArch = fopen(AR_CONSUMO,"rb");
+
+    if(pArch)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArch)>0)
+        {
+
+            for(int mes=1; mes<13; mes++)
+            {
+                for(int dias=1; dias<32; dias++)
+                {
+                    if(c.dia==dias&&c.mes==mes)
+                    {
+
+                        consu[dias][mes]=c;
+                        cuenta[vCuenta]++;
+
+
+                    }
+                }
+                vCuenta++;
+            }
+        }
+        fclose(pArch);
+    }
+    return vCuenta;
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que cuenta el total de datos consumidos hasta la fecha
+* \param dia
+* \param mes
+* \param estructura Consumo
+* \param validos consumos
+* \return total de datos consumidos
+*
+**********************************************************************************/
+int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int vConsumidos)
+{
+    stConsumos c;
+    FILE *pArch =fopen(AR_CONSUMO,"rb");
+    int consumoTotal = 0;
+    if(pArch)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArch)>0)
+        {
+            for(int mes=1; mes<13; mes++)
+            {
+                for(int dias=1; dias<32; dias++)
+                {
+                    if(c.dia==dias&&c.mes==mes)
+                    {
+
+                        mConsumos[dias][mes]=c;
+                        consumoTotal+=mConsumos[dias][mes].datosConsumidos;
+
+                    }
+                }
+
+            }
+        }
+        fclose(pArch);
+    }
+    return consumoTotal;
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que muestra todos los consumos de un cliente
+* \param dia
+* \param mes
+* \param estructura Consumo
+* \param arreglo cuenta los meses que llevan datos
+* \param validos
+*
+**********************************************************************************/
+void muestraTotalConsumos (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta)
+{
+
+    for(int i=1; i<13; i++)
+    {
+
+        for(int j=1; j<31; j++)
+        {
+            if(consu[j][i].dia==j&&consu[j][i].mes==i)
+            {
+                printf("Mes %d /",i);
+                muestraUnConusmo(consu[j][i]);
+            }
+
+
+        }
+    }
+}
+
+
+/************************************************************************//********
+*
+* \brief funcion que muestra los consumos x mes de un cliente
+* \param dia
+* \param mes
+* \param estructura Consumo
+* \param arreglo cuenta los meses que llevan datos
+* \param validos
+*
+**********************************************************************************/
+void muestraConsumoxMes (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta)
+{
+
+    for(int i=mes; i<=mes; i++)
+    {
+
+        for(int j=1; j<31; j++)
+        {
+            if(consu[j][i].dia==j&&consu[j][i].mes==i)
+            {
+                printf("Mes %d /",i);
+                muestraUnConusmo(consu[j][i]);
+            }
+
+
+        }
+    }
+}
+
+
