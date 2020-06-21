@@ -163,9 +163,14 @@ int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int 
 
 
 
+int arch2ArrayConsumoMes(stConsumos a[], int v, int mes);
+int arch2ArrayConsumoDiario(stConsumos a[], int v, int mes,  int dia );
+int datosConsumidosMensual(int mes );
+int datosConsumidosDiarios(int mes,int dia );
 
-
-
+int getDatosConsumidos();
+stConsumos cargaConsumoRandom(int id);
+void cargaConsumoRandomArch(int id,int cantidad);
 
 
 int main()
@@ -230,8 +235,15 @@ int main()
     stConsumos mConsumos[32][13];
     stConsumos aConsumos[13];
     int vMConsu=0;
+    int diaConsumido=0;
     int mesConsumido=0;
     int vConsumidos =0;
+    int datosMensuales=0;
+    int datosDiarios=0;
+
+    int cantConsuAle=0;
+
+
     do
     {
         color(7);
@@ -630,8 +642,10 @@ int main()
 
 
                 case 1:
-                    cargaConsumoArchivo(c.id);
-
+                    ///cargaConsumoArchivo(c.id);
+                    printf("Ingrese la cantidad de Consumos que desee cargar");
+                    scanf("%d",&cantConsuAle);
+                    cargaConsumoRandomArch(c.id,cantConsuAle);
                     break;
 
                 case 2:
@@ -701,28 +715,39 @@ int main()
                         color(7);
                         scanf("%d",&opcionMuestraConsuenMB);
                         system("cls");
+                        vConsu=0;
                         switch(opcionMuestraConsuenMB)
                         {
                         case 1:
 
                             vMConsu=archivoaMatrizConsumo(32,13,mConsumos,aConsumos,vMConsu);
-                            muestraTotalConsumos(32,13,mConsumos,aConsumos,vMConsu);
+                            // muestraTotalConsumos(32,13,mConsumos,aConsumos,vMConsu); No muestra los consumos en dias repetidos, solo dejar que muestre los MB totales
                             vConsumidos= datosConsumidosTotal (32,13,mConsumos,vConsumidos);
-                            printf("\nDatos consumidos %d MB\n\n\n",vConsumidos);
+                            printf("\nDatos consumidos Durante el Periodo MB = [ %d ] \n\n\n",vConsumidos);
                             break;
 
 
                         case 2:
                             printf("\nIngrese El Mes para ver los consumos: ");
                             scanf("%d",&mesConsumido);
-                            vMConsu=archivoaMatrizConsumo(32,mesConsumido,mConsumos,aConsumos,vMConsu);
-                            muestraConsumoxMes(32,mesConsumido,mConsumos,aConsumos,vMConsu);
+                            vConsu= arch2ArrayConsumoMes(muestraConsu,vConsu,mesConsumido);
+                            datosMensuales=datosConsumidosMensual(mesConsumido);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            printf("\nEl total de Datos consumidos en el Mes %d son MB = [ %d ] \n\n",mesConsumido,datosMensuales);
 
                             break;
 
                         case 3:
+                            printf("\nIngrese El Mes para ver los consumos: ");
+                            scanf("%d",&mesConsumido);
+                            printf("\nIngrese El Dia para ver los consumos: ");
+                            scanf("%d",&diaConsumido);
+                            vConsu=  arch2ArrayConsumoDiario(muestraConsu,vConsu,mesConsumido,diaConsumido);
+                            datosDiarios=datosConsumidosDiarios(mesConsumido,diaConsumido);
+                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            printf("\nEl total de Datos consumidos en el Dia %d son MB =[ %d ]\n\n",diaConsumido,datosDiarios);
 
-                            system("pause");
+
                             break;
                         }
                         system("pause");
@@ -758,6 +783,7 @@ int main()
                             break;
 
                         case 2:
+
                             vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
                             muestraConsumosArreglo(muestraConsu,vConsu);
 
@@ -766,12 +792,14 @@ int main()
 
                         case 3:
                             vConsu=arch2ArrayConsumoArchivoBaja(muestraConsu,vConsu,c.id);
-                            if(vConsu)
+                            if(vConsu==0)
                             {
                                 printf("\nNo Hay Registro de datos Consumidos para el Periodo...");
+
                             }
                             else
                             {
+
                                 muestraConsumosArreglo(muestraConsu,vConsu);
                             }
 
@@ -809,7 +837,7 @@ int main()
 
 
 
-
+printf("Gracias por su compra, tarjeta de credito guardada exitosamente");
     return 0;
 }
 
@@ -1084,12 +1112,14 @@ void submenuMuestraConsumosenMb()
     printf("Submenu de Listado");
     color(7);
     gotoxy(30,5);
-    printf("[1].- Muestra Total de consumos Mensuales");
+    printf("[1].- Muestra Total de consumos");
     gotoxy(30,6);
     printf("[2].- Muestra Consumos por Mes");
     gotoxy(30,7);
+    printf("[3].- Muestra Consumos por Dia");
+    gotoxy(30,8);
     printf("0-Salir");
-    gotoxy(45,8);
+    gotoxy(45,9);
 }
 
 /************************************************************************//**
@@ -2428,10 +2458,6 @@ stConsumos cargaUnConsumo()
 
 
 
-
-
-
-
 stConsumos fechaRandom ()
 {
     stConsumos consu;
@@ -2476,6 +2502,39 @@ stConsumos fechaRandom ()
     return consu;
 }
 
+int getDatosConsumidos()
+{
+    return randomRango(1,10000);
+}
+
+
+
+stConsumos cargaConsumoRandom(int id)
+{
+    stConsumos c;
+
+    c = fechaRandom();
+    c.id=buscaUltimoIdConsumo()+1;
+    c.baja=0;
+    c.idCliente = id;
+    c.nroConsumo = buscaUltimoNroConsumo()+1;
+    c.datosConsumidos = getDatosConsumidos();
+
+    return c;
+}
+
+void cargaConsumoRandomArch(int id,int cantidad)
+{
+    stConsumos c;
+    int i=0;
+
+    while(i<cantidad)
+    {
+        c = cargaConsumoRandom(id);
+        guardaConsumoEnArchivo(c);
+        i++;
+    }
+}
 
 /************************************************************************//**
 *
@@ -3086,20 +3145,144 @@ void muestraTotalConsumos (int dias,int mes,stConsumos consu[dias][mes],int cuen
 void muestraConsumoxMes (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta)
 {
 
-    for(int i=mes; i<=mes; i++)
+    for(int j=1; j<31; j++)
     {
-
-        for(int j=1; j<31; j++)
+        if(consu[j][mes].dia==j && consu[j][mes].mes==mes)
         {
-            if(consu[j][i].dia==j&&consu[j][i].mes==i)
+            printf("Mes %d /",mes);
+            muestraUnConusmo(consu[j][mes]);
+        }
+
+
+    }
+
+}
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos de un mes en particular del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
+
+int arch2ArrayConsumoMes(stConsumos a[], int v, int mes)
+{
+    stConsumos c;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+
+            if(c.mes == mes )
             {
-                printf("Mes %d /",i);
-                muestraUnConusmo(consu[j][i]);
+
+                a[v]=c;
+                v++;
             }
 
+        }
+        fclose(pArchConsumo);
+    }
+    return v;
+}
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos de un dia en particular del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
+
+int arch2ArrayConsumoDiario(stConsumos a[], int v, int mes, int dia )
+{
+    stConsumos c;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+
+            if(c.mes == mes && c.dia == dia)
+            {
+
+                a[v]=c;
+                v++;
+            }
 
         }
+        fclose(pArchConsumo);
     }
+    return v;
+}
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos de un dia en particular del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
+
+int datosConsumidosMensual(int mes )
+{
+    stConsumos c;
+    int datosMensual=0;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+
+            if(c.mes == mes )
+            {
+                datosMensual=datosMensual+c.datosConsumidos;
+            }
+
+        }
+        fclose(pArchConsumo);
+    }
+    return datosMensual;
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que pasa los consumos de un dia en particular del archivo a un arreglo
+* \param Arreglo de consumos
+* \param validos
+* \param id
+* \return validos cargados del archivo al arreglo
+*
+***************************************************************************/
+
+int datosConsumidosDiarios(int mes,int dia )
+{
+    stConsumos c;
+    int datosDiarios=0;
+    FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
+    if(pArchConsumo)
+    {
+        while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
+        {
+
+            if(c.mes == mes && c.dia == dia )
+            {
+                datosDiarios=datosDiarios+c.datosConsumidos;
+            }
+
+        }
+        fclose(pArchConsumo);
+    }
+    return datosDiarios;
 }
 
 

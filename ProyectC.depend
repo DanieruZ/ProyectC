@@ -1,17 +1,20 @@
 # depslib dependency file v1.0
-1491400448 source:c:\users\home\desktop\programacion\proyect c\gotoxy.c
+1491400448 source:c:\users\home\desktop\programacion\proyectc\gotoxy.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
 
-1592259406 source:c:\users\home\desktop\programacion\proyect c\main.c
+1491371648 source:c:\users\jerer\onedrive\escritorio\proyectc\gotoxy.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
+1592060538 source:c:\users\jerer\onedrive\escritorio\proyectc\main.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
 	"gotoxy.h"
 	<stdbool.h>
-	"time.h"
-	<time.h>
 
-1491399894 c:\users\home\desktop\programacion\proyect c\gotoxy.h
+1491371094 c:\users\jerer\onedrive\escritorio\proyectc\gotoxy.h
 
