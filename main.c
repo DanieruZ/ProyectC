@@ -65,12 +65,14 @@ void submenuMuestra();
 void submenuMuestraConsumos();
 void submenuModificacionConsu();
 void submenuMuestraConsumosenMb();
+void submenuAltaCliente();
 
 //******** PROTOTIPADO DE FUNCIONES DE CARGAS
 stCliente cargaUnCliente();
 void cargaClienteArchivo ();
 void cargaClienteRandomArchivo ();
 stCliente cargoClientesRandom();
+void cargaClienteRandomArch(int cantidad);
 
 //******** PROTOTIPADO DE MUESTRA
 void muestraUnCliente(stCliente c);/// modificar para gotoxy;
@@ -196,6 +198,7 @@ int main()
     int opcionPpal=0;
     int opcionCli=0;
     int opcionConsu=0;
+    int opcionAlta=0;
 
 
 
@@ -207,12 +210,13 @@ int main()
     int opcionMuestraCli=0;
     gotoxy(20,10);
     printf("Process returned 1 (20x1)   execution time : 0.783 s [ you Compueter is infected ] ");
-    Sleep(5000);
+    Sleep(3500);
 
     intro();      ///Intro al trabajo
     printtest(); /// MENSAJE DE INICIO
     Sleep(1500); /// el tiempo que demora el mensaje en pantalla
     int nroConsulta;
+    int cantidadRandom=0;
 
     ///*** Variables usadas para las funciones de consultas.
     int  dniConsu;
@@ -294,17 +298,45 @@ int main()
 
 
                 case 1:
-                    printf("\n Submenu de alta");
-                    //cargaClienteArchivo();
-                    cargaClienteRandomArchivo();
 
+                    do
+                    {
+                        system("cls");
+                        submenuAltaCliente();
+                        color(9);
+                        printf("Opcion: ");
+                        color(7);
+                        scanf("%d",&opcionAlta);
+                        system("cls");
+
+
+                        switch(opcionAlta)
+                        {
+                        case 1:
+                            cargaClienteArchivo();
+                            break;
+
+                        case 2:
+                            printf("Ingrese la Cantidad de Clientes Aleatorios a Cargar en el Sistema: ");
+                            scanf("%d",&cantidadRandom);
+                            cargaClienteRandomArch(cantidadRandom);
+                            break;
+                        }
+
+                    }
+                    while(opcionAlta!=0);
+                    // system("pause");
 
 
                     break;
 
                 case 2:
-                    printf("\n Menu Baja Cliente ");
-                    printf("\n Ingrese el Nro de Cliente ");
+                    color(63);
+                    gotoxy(40,2);
+                    printf("Menu Baja Cliente ");
+                    color(7);
+                    gotoxy(20,4);
+                    printf("Ingrese el Nro de Cliente ");
                     scanf("%d",&nroConsulta);
                     modificaBajaCliente(nroConsulta);
 
@@ -596,6 +628,11 @@ int main()
                         switch(opcionMuestraCli)
                         {
                         case 1:
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Listado de Clientes ");
+                            color(7);
+                            gotoxy(40,4);
                             vCliMuestra = arch2ArrayClienteArchivo(cliMuestra,vCliMuestra);
                             ordenaSeleccionNombre(cliMuestra,vCliMuestra);
                             muestraClientesArreglo(cliMuestra,vCliMuestra);
@@ -604,6 +641,11 @@ int main()
                             break;
 
                         case 2:
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Listado de Clientes Activos ");
+                            color(7);
+                            gotoxy(40,4);
                             vCliMuestra= arch2ArrayClienteArchivoActivo(cliMuestra,vCliMuestra);
                             ordenaSeleccionNombre(cliMuestra,vCliMuestra);
                             muestraClientesArreglo(cliMuestra,vCliMuestra);
@@ -612,10 +654,23 @@ int main()
                             break;
 
                         case 3:
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Listado de Clientes de Baja ");
+                            color(7);
+                            gotoxy(40,4);
                             vCliMuestra=arch2ArrayClienteArchivoBaja(cliMuestra,vCliMuestra);
-                            ordenaSeleccionNombre(cliMuestra,vCliMuestra);
-                            muestraClientesArreglo(cliMuestra,vCliMuestra);
-                            system("pause");
+                            if(vCliMuestra==0)
+                            {
+                                mensajeDestello("Sin clientes Inactivos...");
+                            }
+                            else
+                            {
+                                ordenaSeleccionNombre(cliMuestra,vCliMuestra);
+                                muestraClientesArreglo(cliMuestra,vCliMuestra);
+                                system("pause");
+                            }
+
                             break;
 
 
@@ -648,16 +703,31 @@ int main()
                 printf("Ingrese el Nro de Cliente: ");
                 scanf("%d",&c.nroCliente);
                 c=buscaUnClienteNroClienteArchivo(c.nroCliente);
-                gotoxy(10,8);
-                mensaje();
-                gotoxy(20,7);
-                muestraUnCliente(c);
-                gotoxy(2,20);
-                printf("[0] Correcto - [1] Incorrecto");
-                gotoxy(2,21);
-                printf("Opcion ");
-                scanf("%d",&opcionIngresoCOnsu);
-                system("cls");
+                if(c.baja==1) /// Verificamos que el cliente se encuentre activo para poder realizar consumos o acceder a cualquier tipo de datos relacionados con ellos
+                {
+                    printf("\nCliente Inactivo, Activelo e ingrese Nuevamente");
+                    Sleep(2000);
+                    gotoxy(37,6);
+                    printf("                                     ");
+                    gotoxy(0,8);
+                    printf("                                                    ");
+
+
+                }
+                else
+                {
+                    gotoxy(10,8);
+                    mensaje();
+                    gotoxy(20,7);
+                    muestraUnCliente(c);
+                    gotoxy(2,20);
+                    printf("[0] Correcto - [1] Incorrecto");
+                    gotoxy(2,21);
+                    printf("Opcion ");
+                    scanf("%d",&opcionIngresoCOnsu);
+                    system("cls");
+                }
+
             }
             opcionIngresoCOnsu=1; /// Para que cada vez que salga y vuelva a entra Pida nuevamente el nro de cliente
 
@@ -795,14 +865,25 @@ int main()
                         switch(opcionMuestraConsuenMB)
                         {
                         case 1:
-
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Menu Consumos");
+                            color(7);
                             vMConsu=archivoaMatrizConsumo(32,13,mConsumos,aConsumos,vMConsu);
                             vConsumidos= datosConsumidosTotal (32,13,mConsumos,vConsumidos);
-                            printf("\nDatos consumidos Durante el Periodo MB = [ %d ] \n\n\n",vConsumidos);
+                            color(30);
+                            gotoxy(30,4);
+                            printf("Datos consumidos Durante el Periodo MB = [ %d ]",vConsumidos);
+                            color(7);
+                            printf("\n\n");
                             break;
 
 
                         case 2:
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Menu Consumos");
+                            color(7);
                             printf("\nIngrese El Mes para ver los consumos: ");
                             scanf("%d",&mesConsumido);
                             vConsu= arch2ArrayConsumoMes(muestraConsu,vConsu,mesConsumido);
@@ -815,11 +896,18 @@ int main()
                             color(7);
                             printf("\n\n");
                             muestraConsumosArreglo(muestraConsu,vConsu);
-                            printf("\nEl total de Datos consumidos en el Mes %d son MB = [ %d ] \n\n",mesConsumido,datosMensuales);
+                            color(30);
+                            printf("\nEl total de Datos consumidos en el Mes %d son MB = [ %d ]",mesConsumido,datosMensuales);
+                            color(7);
+                            printf("\n\n");
 
                             break;
 
                         case 3:
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Menu Consumos");
+                            color(7);
                             printf("\nIngrese El Mes para ver los consumos: ");
                             scanf("%d",&mesConsumido);
                             printf("\nIngrese El Dia para ver los consumos: ");
@@ -834,7 +922,10 @@ int main()
                             color(7);
                             printf("\n\n");
                             muestraConsumosArreglo(muestraConsu,vConsu);
-                            printf("\nEl total de Datos consumidos en el Dia %d son MB =[ %d ]\n\n",diaConsumido,datosDiarios);
+                            color(30);
+                            printf("\nEl total de Datos consumidos en el Dia %d son MB =[ %d ]",diaConsumido,datosDiarios);
+                            color(7);
+                            printf("\n\n");
 
 
                             break;
@@ -866,18 +957,34 @@ int main()
                         case 1:
 
                             vConsu=arch2ArrayConsumoArchivo(muestraConsu,vConsu,c.id);
-                            system("cls");
-                            mensajeListadoConsumo();
-                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            if(vConsu==0)
+                            {
+                                mensajeDestello("\nNo Hay Registro de datos Consumidos para el Periodo...\n\n\n");
+                            }
+                            else
+                            {
+                                system("cls");
+                                mensajeListadoConsumo();
+                                muestraConsumosArreglo(muestraConsu,vConsu);
+                            }
+
 
                             break;
 
                         case 2:
 
                             vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
-                            system("cls");
-                            mensajeListadoConsumo();
-                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            if(vConsu==0)
+                            {
+                                mensajeDestello("\nNo Hay Registro de datos Consumidos para el Periodo...\n\n\n");
+                            }
+                            else
+                            {
+                                system("cls");
+                                mensajeListadoConsumo();
+                                muestraConsumosArreglo(muestraConsu,vConsu);
+                            }
+
 
                             break;
 
@@ -885,7 +992,7 @@ int main()
                             vConsu=arch2ArrayConsumoArchivoBaja(muestraConsu,vConsu,c.id);
                             if(vConsu==0)
                             {
-                                printf("\nNo Hay Registro de datos Consumidos para el Periodo...\n\n\n");
+                                mensajeDestello("\nNo Hay Registro de datos Consumidos para el Periodo...\n\n\n");
 
                             }
                             else
@@ -897,18 +1004,19 @@ int main()
                             }
 
 
-                            system("pause");
+
                             break;
 
 
                         }
+                        system("pause");
 
 
 
                     }
                     while(opcionMuestraConsu!=0);
 
-                    system("pause");
+
                     break;
 
 
@@ -917,7 +1025,7 @@ int main()
             while(opcionConsu!=0);
             break;
         }
-        // system("pause");
+
 
     }
     while(opcionPpal!=0);
@@ -930,7 +1038,7 @@ int main()
 
 
 
-    printf("Gracias por su compra, tarjeta de credito guardada exitosamente");
+    printf("Gracias por utilizar el programa pedorro =)");
     return 0;
 }
 
@@ -1047,6 +1155,29 @@ void mensajeConsultas()
     color(63);
     printf("Menu de Consultas");
     color(7);
+
+}
+
+
+/************************************************************************//**
+*
+* \brief funcion que muestra el submenu de alta clientes
+*
+***************************************************************************/
+
+void submenuAltaCliente()
+{
+    color(3);
+    gotoxy(35,3);
+    printf(" Alta de Clientes ");
+    color(7);
+    gotoxy(30,5);
+    printf("[1].- Alta Cliente Manual");
+    gotoxy(30,6);
+    printf("[2].- Alta Cliente Automatica");
+    gotoxy(30,8);
+    printf("0-Salir");
+    gotoxy(45,8);
 
 }
 
@@ -1377,6 +1508,14 @@ stCliente cargaUnCliente()
             printf("Ingrese el nro de Cliente..........: ");
             scanf("%d",&c.nroCliente);
             validaCli=validaCliente(c.nroCliente);
+            if(validaCli==1)
+            {
+                gotoxy(39,3);
+                printf("        ");
+                gotoxy(3,5);
+                printf("Ingrese un nro de cliente valido");
+            }
+
         }
     }
     while(c.nroCliente<0 || c.nroCliente>9999999);
@@ -1443,7 +1582,10 @@ void cargaClienteArchivo ()
     while(opcion!=27)
     {
         system("cls");
+        color(63);
+        gotoxy(40,2);
         printf("Sistema de Alta de Clientes...");
+        color(7);
         c=cargaUnCliente();
         c.id=buscaUltimoId()+1;
         guardaClienteArchivo(c);
@@ -1461,7 +1603,7 @@ void cargaClienteArchivo ()
 ***************************************************************************/
 void muestraUnCliente(stCliente c) /// modificar para gotoxy
 {
-    printf("\n  --------------------------------------------");
+    printf("\n  %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",219,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223,223);
     printf("\n  ID......................: %d", c.id);
     printf("\n  Nro de Cliente..........: %d", c.nroCliente);
     printf("\n  Nombre..................: %s", c.nombre);
@@ -1471,7 +1613,7 @@ void muestraUnCliente(stCliente c) /// modificar para gotoxy
     printf("\n  Calle...................: %s", c.domicilio);
     printf("\n  Nro de Celular..........: %d", c.movil);
     printf("\n  Baja s/n................: %s", (c.baja)?"SI":"NO");
-    printf("\n  --------------------------------------------");
+    printf("\n  %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",219,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220,220);
     printf("\n");
 }
 
@@ -2311,10 +2453,12 @@ void modificaBajaCliente(int baja)
             if(c.baja==0)
             {
                 printf("\n****Cliente Activo**** \n");
+                muestraUnCliente(c);
             }
             else
             {
                 printf("\n****Cliente Inactivo**** \n");
+                muestraUnCliente(c);
             }
             printf("\nPresione [1] para Desactivar y [0] Para activar: ");
             scanf("%d", &pasaje);
@@ -2325,6 +2469,7 @@ void modificaBajaCliente(int baja)
                 fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
                 if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
                 {
+
                     printf("El Cliente se actualizo Correctamente!!\n");
                     muestraUnCliente(c);
                     system("pause");
@@ -2337,6 +2482,7 @@ void modificaBajaCliente(int baja)
                 fseek(pArchCliente,sizeof(stCliente)*(i-1),SEEK_SET);
                 if(fwrite(&c,sizeof(stCliente),1,pArchCliente)==1)
                 {
+
                     printf("El Cliente se actualizo Correctamente!!\n");
                     muestraUnCliente(c);
                     system("pause");
@@ -2486,10 +2632,10 @@ int randomRango(int min, int max)
 void getNomEmail(char ne[])
 {
     char nombresem[][30] = {"alconNegro","Aniceto","Glafida","Aproniano","","Austiquiliano","pikachu","Canuto",
-                          "Liduvina","Cilta","Merenciana","Crescenciano","Meuris","Ercilio","Ninfodora","Espidiforo",
-                          "Sovietic","Evasilio","Sindulfo","casaRoja","peakyBlinder","daredevil","ricardoFort","tornado","bocaSubcampeon","profeaprobanos","lapromocionamo",
-                          "asusRog","ibm","apple","zeus"
-                         };
+                            "Liduvina","Cilta","Merenciana","Crescenciano","Meuris","Ercilio","Ninfodora","Espidiforo",
+                            "Sovietic","Evasilio","Sindulfo","casaRoja","peakyBlinder","daredevil","ricardoFort","tornado","bocaSubcampeon","profeaprobanos","lapromocionamo",
+                            "asusRog","ibm","apple","zeus"
+                           };
 
     strcpy(ne,strcat(nombresem[randomRango(1,sizeof(nombresem)/(sizeof(char)*30))],"@hotmail.com"));
 
@@ -2505,23 +2651,41 @@ void getNomEmail(char ne[])
 *****************************************************************/
 void getNombre(char n[])
 {
-    char nombres[][30] = {"Ailin","Juan","Jeremias","Daniel","Fernando","Lautaro","Mailen","Jose",
-                          "Anastasio","Arturo","Mario","Tamaro","Adolfo","Pedro","Alfredo","Arnaldo",
-                          "Mauro","Benicio","Ildefonso","Cuchuflito","Remilgo","Miguel","Reinaldo"
-                         };
+    char nombres[][150] = {"Ailin","Juan","Jeremias","Daniel","Fernando","Lautaro","Mailen","Jose",
+                           "Anastasio","Arturo","Mario","Tamaro","Adolfo","Pedro","Alfredo","Arnaldo",
+                           "Mauro","Benicio","Ildefonso","Cuchuflito","Remilgo","Miguel","Reinaldo","Aaron",
+                           "Abdon", "Abel", "Abelardo", "Abrahan", "Absalon", "Acacio", "Adalberto", "Adan",
+                           "Adela", "Adelaida", "Adolfo", "Adon", "Adrian", "Agustin", "Aitor", "Alba", "Albert",
+                           "Alberto", "Albina", "Alejandra", "Alejandro", "Alejo", "Alfonso", "Alfredo", "Alicia",
+                           "Alipio", "Almudena", "Alonso", "Alvaro", "Amadeo", "Amaro", "Ambrosio", "Amelia", "Amparo",
+                           "Ana", "Ananias", "Anastasia", "Anatolio", "Andrea", "Andres", "Angel", "Angela", "Angeles",
+                           "Aniano", "Anna", "Anselmo", "Antero", "Antonia", "Antonio", "Aquiles", "Araceli", "Aranzazu",
+                           "Arcadio", "Aresio", "Ariadna", "Aristides", "Arnaldo", "Artemio", "Arturo", "Ascension", "Asuncion",
+                           "Atanasio", "Augusto", "Aurea", "Aurelia", "Aureliano", "Aurelio", "Aurora", "Baldomero", "Balduino",
+                           "Baltasar", "Barbara", "Bartolome", "Basileo", "Beatriz", "Begonia", "Belen", "Beltran", "Benedicto",
+                           "Benigno", "Benito", "Benjamin", "Bernabe", "Bernarda", "Bernardo", "Blanca", "Blas", "Bonifacio",
+                           "Borja", "Bruno", "Calixto", "Camilo", "Candida", "Carina", "Carlos", "Carmelo", "Carmen", "Carolina",
+                           "Casiano", "Casimiro", "Casio", "Catalina", "Cayetano", "Cayo", "Cecilia", "Ceferino", "Celia", "Celina",
+                           "Celso", "Cesar", "Cesareo", "Cipriano", "Cirilo", "Cirino", "Ciro", "Clara", "Claudia", "Claudio",
+                           "Cleofas", "Clotilde", "Colombo", "Columba", "Columbano", "Concepción", "Conrado", "Constancio",
+                          };
 
-    strcpy(n,nombres[randomRango(0,sizeof(nombres)/(sizeof(char)*30))]);
+    strcpy(n,nombres[randomRango(0,sizeof(nombres)/(sizeof(char)*150))]);
 }
 
 void getApellido(char a[])
 {
-    char apellidos[][30] = {"Gomez","Perez","Roca","Latorre","Fernandez","Torquemada", "Marijuan", "Roca", "Mitre", "Rivadavia",
-                            "San Martin", "Alvarez", "Comizo", "Borges", "Zama", "Recato", "Olvido", "Gil", "Trapero", "Restinga",
-                            "De Antonio", "Ramirez", "Spinetta", "Cortez", "Gonzalez", "Andujar", "San Juan", "Bautista", "Anchorena", "Paso",
-                            "Gaboto","Vega","Vargas","Lloret","Linares","Suarez","Sierra","Amenabar","Blanco","White","Black"
-                           };
+    char apellidos[][100] = {"Gomez","Perez","Roca","Latorre","Fernandez","Torquemada", "Marijuan", "Roca", "Mitre", "Rivadavia",
+                             "San Martin", "Alvarez", "Comizo", "Borges", "Zama", "Recato", "Olvido", "Gil", "Trapero", "Restinga",
+                             "De Antonio", "Ramirez", "Spinetta", "Cortez", "Gonzalez", "Andujar", "San Juan", "Bautista", "Anchorena", "Paso",
+                             "Gaboto","Vega","Vargas","Lloret","Linares","Suarez","Sierra","Amenabar","Blanco","White","Black","Aguilar", "Alonso",
+                             "Alvarez", "Arias", "Benítez", "Blanco", "Blesa", "Bravo", "Caballero", "Cabrera", "Calvo", "Cambil", "Campos", "Can",
+                             "Carmona", "Carrasco", "Castillo", "Castro", "Crespo", "Cruz", "Da Silva", "Delgado",
+                             "Duran", "Esteban", "Fernandez", "Ferrer", "Flores", "Fuentes", "Gallardo", "Gallego", "Gimenez","Hidalgo", "Ibañez", "Iglesias", "Jimenez",
+                             "Leon", "Lopez", "Lorenzo", "Lozano","Perez", "Prieto", "Ramos", "Rey", "Reyes", "Roca",  "Roman", "Saez", "Sanz",  "Suarez", "Torres", "Vargas", "Vazquez", "Vega", "Velasco",
+                             "Vicente", "Vidal", "Zarategui","romano","griego","persa"};
 
-    strcpy(a,apellidos[randomRango(0,sizeof(apellidos)/(sizeof(char)*30))]);
+    strcpy(a,apellidos[randomRango(0,sizeof(apellidos)/(sizeof(char)*100))]);
 
 }
 
@@ -2533,7 +2697,7 @@ int getDNI()
 int getMovil()
 {
 
-   return randomRango(4800000,5700000);
+    return randomRango(4800000,5700000);
 
 }
 
@@ -2544,28 +2708,31 @@ void getCalle(char c[])
     char calles[][30] = {"San Juan ","Funes","Gaboto","San Martin","Colon","Rivadavia", "Alsina", "Roca", "Mitre", "Belgrano",
                          "Paso", "11 de Septiembre", "3 de Febrero", "Balcarce", "Libertad", "Magallanes", "Irala", "Ayolas", "Moreno", "Brown",
                          "Bolivar", "Alberti", "Gascon", "La Rioja", "Catamarca", "Salta", "Jujuy", "XX de Septiembre", "14 de Julio", "Dorrego",
-                         "Hernandarias","Don Orione","Juramento","Lanzilota","Estrada","Tierra del Fuego","Mendoza","Chubut","Rio Negro","Misiones","Edison"
+                         "Hernandarias","Don Orione","Juramento","Lanzilota","Estrada","Tierra del Fuego","Mendoza","Chubut","Rio Negro","Misiones","Edison",
+                         "Alberti", "Moreno", "Cordoba", "Belgrano", "Colon", "Rivadavia",  "Gascon", "Falucho", "Bolivar", "Buenos Aires", "Santa Fe",
+                         "Independencia", "Corrientes", "San Martin", "Guemes", "Santiago del Estero", "Alvarado", "San Luis", "Catamarca", "Rawson",
+                         "Jujuy", "Entre Rios", "Juan B. Justo", "La Rioja", "Garay", "San Juan", "Luro", "Salta", "12 de Octubre", "Las Heras", "25 de Mayo",
+                         "Sarmiento", "Mitre", "Tucuman", "Arenales", "9 de Julio", "Olavarria", "Lamadrid", "Castelli", "Dorrego", "Constitucion", "Brown",
+                         "Madrid", "Magallanes", "San Lorenzo", "Avellaneda", "Roca", "Alsina", "Libertad", "3 de Febrero", "20 de Septiembre", "Balcarce",
+                         "11 de Septiembre", "Matheu", "14 de Julio", "Puan", "Alvear", "Ituzaingo", "Rodriguez Pena", "Alem", "Chaco", "Funes", "Santa Cruz",
+                         "Ayacucho", "Chacabuco", "Almirante Brown", "Misiones", "Av. Colon", "Cerrito"
                         };
 
-   strcpy(c,calles[randomRango(0,sizeof(calles)/(sizeof(char)*30))]);
+    strcpy(c,calles[randomRango(0,sizeof(calles)/(sizeof(char)*30))]);
 
 }
 
-void getEmail(char nombre[],char apellido[],char email[])
-{
-    email=strcat(strcat(nombre,"@"),apellido);
-}
 
 stCliente cargoClientesRandom()
 {
     stCliente c;
     c.baja=0;
-   c.nroCliente=buscaUltimoNroCliente()+1;
+    c.id=buscaUltimoId()+1;
+    c.nroCliente=buscaUltimoNroCliente()+1;
     getApellido(c.apellido);
     getNombre(c.nombre);
     c.dni=getDNI();
     getCalle(c.domicilio);
-   // strcpy(c.email,strcat(strcat(c.nombre,"@"),"hotmail.com"));
     getNomEmail(c.email);
     c.movil=getMovil();
     return c;
@@ -2580,15 +2747,41 @@ void cargaClienteRandomArchivo ()
 {
     stCliente c;
     char opcion =0;
-    while(opcion!=27)
+    while(opcion!=27 )
     {
         system("cls");
+        gotoxy(40,2);
+        color(63);
         printf("Sistema de Alta de Clientes...");
+        color(7);
         c=cargoClientesRandom();
         c.id=buscaUltimoId()+1;
         guardaClienteArchivo(c);
+        gotoxy(30,4);
+        printf("Enter Para Agregar un Cliente");
+        gotoxy(30,5);
         printf("ESC para salir ");
         opcion=getch();
+
+    }
+}
+
+/************************************************************************//**
+*
+* \brief funcion que carga el cliente random al archivo
+* \param int cantidad  de datos a cargar
+*
+***************************************************************************/
+void cargaClienteRandomArch(int cantidad)
+{
+    stCliente c;
+    int i=0;
+
+    while(i<cantidad)
+    {
+        c = cargoClientesRandom();
+        guardaClienteArchivo(c);
+        i++;
     }
 }
 
@@ -2777,7 +2970,7 @@ stConsumos fechaRandom ()
 {
     stConsumos consu;
     consu.anio=2020; // año de consumos...
-    consu.mes=randomRango(1,12);
+    consu.mes=randomRango(1,13);
 
     if ( consu.mes >= 1 && consu.mes <= 12 )
     {
@@ -3071,6 +3264,7 @@ int arch2ArrayConsumoArchivoActivo(stConsumos a[],int v, int id)
     {
         while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
         {
+
             if(c.baja==0&&c.idCliente==id)
             {
                 a[v]=c;
@@ -3142,7 +3336,7 @@ void muestraConsumosArreglo(stConsumos a[],int v)
 
 
         i++;
-        if(i%5 ==0)
+        if(i%5 ==0) /// Para que muestre de a 5 datos
         {
             system("pause");
         }
