@@ -1096,7 +1096,7 @@ void intro()
         color(3);
         system("title UTMOVIL");
 
-        int numeros[21] = {0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1};
+        int numeros[21] = {0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1};
         int i;
         int j=0;
 
@@ -2916,7 +2916,7 @@ stConsumos cargaUnConsumo()
         case 11 :
             do
             {
-                gotoxy(3,8);
+                gotoxy(3,7);
                 printf("Ingrese el dia del Consumo.....");
                 scanf("%d",&consu.dia);
             }
@@ -2926,30 +2926,33 @@ stConsumos cargaUnConsumo()
         case  2 :
             if( consu.anio % 4 == 0 && consu.anio % 100 != 0 || consu.anio % 400 == 0 )
             {
-                if ( consu.dia >= 1 && consu.dia <= 29 )
-                {
                     do
                     {
-                        gotoxy(3,9);
-                        printf("\nIngrese el dia del Consumo.....");
+                        gotoxy(34,7);
+                        printf("    ");
+                        gotoxy(3,7);
+                        printf("Ingrese el dia del Consumo.....");
                         scanf("%d",&consu.dia);
                     }
-                    while(consu.dia<=1 && consu.dia>=29);
-                }
-                else
-                {
-                    do
-                    {
-                        printf("\nIngrese el dia del Consumo.....");
-                        scanf("%d",&consu.dia);
-                    }
-                    while(consu.dia<=1 && consu.dia>=28);
-                }
+                    while(consu.dia<1 || consu.dia>=30);
             }
+
+
+            else
+            {
+               do
+                    {
+                        gotoxy(3,7);
+                        printf("Ingrese el dia del Consumo.....");
+                        scanf("%d",&consu.dia);
+                    }
+                    while(consu.dia<1 || consu.dia>=29);
+            }
+
         }
     }
-    gotoxy(3,10);
-    printf("Ingrese sus consumos en MB.............");
+    gotoxy(3,8);
+    printf("Ingrese sus consumos en MB.....");
     scanf("%d",&consu.datosConsumidos);
     consu.baja=0;
     consu.nroConsumo=buscaUltimoNroConsumo()+1;
