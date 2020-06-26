@@ -141,7 +141,7 @@ void cargaConsumoArchivo (int idCliente);
 //******** PROTOTIPADO FUNCIONES MUESTRA CONSUMO
 void muestraUnConusmo(stConsumos consu);
 void muestraConsumoArchivo();
-void muestraConsumosArreglo(stConsumos a[],int v);
+void muestraConsumosArreglo(stConsumos a[],int v,int id);
 
 
 //******** PROTOTIPADO FUNCIONES ARCHIVO A ARREGLO CONSUMO
@@ -171,13 +171,13 @@ void modificaConsumosMB(int nroConsumo, int nuevoConsumo);
 int archivoaMatrizConsumo (int dia,int mes,stConsumos consu[dia][mes],int cuenta[],int vCuenta);
 void muestraTotalConsumos (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta);
 void muestraConsumoxMes (int dias,int mes,stConsumos consu[dias][mes],int cuenta[],int vCuenta);
-int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int vConsumidos);
+int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int vConsumidos,int id);
 
 //******** PROTOTIPADO FUNCIONES DATOS CONSUMIDOS
 int arch2ArrayConsumoMes(stConsumos a[], int v, int mes);
 int arch2ArrayConsumoDiario(stConsumos a[], int v, int mes,  int dia );
-int datosConsumidosMensual(int mes );
-int datosConsumidosDiarios(int mes,int dia );
+int datosConsumidosMensual(int mes, int id );
+int datosConsumidosDiarios(int mes,int dia,int id );
 
 //******** PROTOTIPADO FUNCIONES CONSUMOS RANDOM
 int getDatosConsumidos();
@@ -317,9 +317,16 @@ int main()
                             break;
 
                         case 2:
+                            gotoxy(35,3);
+                            color(63);
+                            printf("Sistema de Alta de Clientes...");
+                            color(7);
+                            gotoxy(15,5);
                             printf("Ingrese la Cantidad de Clientes Aleatorios a Cargar en el Sistema: ");
                             scanf("%d",&cantidadRandom);
                             cargaClienteRandomArch(cantidadRandom);
+                            mensaje();
+
                             break;
                         }
 
@@ -792,7 +799,7 @@ int main()
 
                 case 2:
                     vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
-                    muestraConsumosArreglo(muestraConsu,vConsu);
+                    muestraConsumosArreglo(muestraConsu,vConsu,c.id);
 
                     color(63);
                     printf("Ingrese el Nro de Consumo a Eliminar: ");
@@ -819,21 +826,28 @@ int main()
                         case 1:
 
                             vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
-                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            muestraConsumosArreglo(muestraConsu,vConsu,c.id);
+                            color(63);
                             printf("Ingrese el Nro de Consumo a Modificar la Fecha: ");
+                            color(7);
                             scanf("%d",&consumo.nroConsumo);
-                            printf("\n%d Nro consumo",consumo.nroConsumo);
-                            system("pause");
+                            system("cls");
+                            color(63);
+                            gotoxy(40,2);
+                            printf("Sistema de modificacion de Fecha");
+                            color(7);
                             modificaFechaCOnsumo(consumo.nroConsumo,consumo.anio,consumo.mes,consumo.dia);
                             break;
 
 
                         case 2:
                             vConsu=arch2ArrayConsumoArchivoActivo(muestraConsu,vConsu,c.id);
-                            muestraConsumosArreglo(muestraConsu,vConsu);
-                            printf("Ingrese el Nro de Consumo a Modificar la Fecha: ");
+                            muestraConsumosArreglo(muestraConsu,vConsu,c.id);
+                            color(63);
+                            printf("Ingrese el Nro de Consumo a Modificar los MB: ");
+                            color(7);
                             scanf("%d",&consumo.nroConsumo);
-                            printf("Ingrese los nuevos Mb");
+                            printf("\n\nIngrese los nuevos Mb:");
                             scanf("%d",&consumo.datosConsumidos);
                             modificaConsumosMB(consumo.nroConsumo,consumo.datosConsumidos);
 
@@ -870,7 +884,7 @@ int main()
                             printf("Menu Consumos");
                             color(7);
                             vMConsu=archivoaMatrizConsumo(32,13,mConsumos,aConsumos,vMConsu);
-                            vConsumidos= datosConsumidosTotal (32,13,mConsumos,vConsumidos);
+                            vConsumidos= datosConsumidosTotal (32,13,mConsumos,vConsumidos,c.id);
                             color(30);
                             gotoxy(30,4);
                             printf("Datos consumidos Durante el Periodo MB = [ %d ]",vConsumidos);
@@ -887,7 +901,7 @@ int main()
                             printf("\nIngrese El Mes para ver los consumos: ");
                             scanf("%d",&mesConsumido);
                             vConsu= arch2ArrayConsumoMes(muestraConsu,vConsu,mesConsumido);
-                            datosMensuales=datosConsumidosMensual(mesConsumido);
+                            datosMensuales=datosConsumidosMensual(mesConsumido,c.id);
                             mensaje();
                             system("cls");
                             gotoxy(30,5);
@@ -895,7 +909,7 @@ int main()
                             printf("Datos Conusmidos durante el MES");
                             color(7);
                             printf("\n\n");
-                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            muestraConsumosArreglo(muestraConsu,vConsu,c.id);
                             color(30);
                             printf("\nEl total de Datos consumidos en el Mes %d son MB = [ %d ]",mesConsumido,datosMensuales);
                             color(7);
@@ -913,7 +927,7 @@ int main()
                             printf("\nIngrese El Dia para ver los consumos: ");
                             scanf("%d",&diaConsumido);
                             vConsu=  arch2ArrayConsumoDiario(muestraConsu,vConsu,mesConsumido,diaConsumido);
-                            datosDiarios=datosConsumidosDiarios(mesConsumido,diaConsumido);
+                            datosDiarios=datosConsumidosDiarios(mesConsumido,diaConsumido,c.id);
                             mensaje();
                             system("cls");
                             gotoxy(30,5);
@@ -921,7 +935,7 @@ int main()
                             printf("Datos Conusmidos durante el Mes %d y Dia %d",mesConsumido,diaConsumido);
                             color(7);
                             printf("\n\n");
-                            muestraConsumosArreglo(muestraConsu,vConsu);
+                            muestraConsumosArreglo(muestraConsu,vConsu,c.id);
                             color(30);
                             printf("\nEl total de Datos consumidos en el Dia %d son MB =[ %d ]",diaConsumido,datosDiarios);
                             color(7);
@@ -965,7 +979,7 @@ int main()
                             {
                                 system("cls");
                                 mensajeListadoConsumo();
-                                muestraConsumosArreglo(muestraConsu,vConsu);
+                                muestraConsumosArreglo(muestraConsu,vConsu,c.id);
                             }
 
 
@@ -982,7 +996,7 @@ int main()
                             {
                                 system("cls");
                                 mensajeListadoConsumo();
-                                muestraConsumosArreglo(muestraConsu,vConsu);
+                                muestraConsumosArreglo(muestraConsu,vConsu,c.id);
                             }
 
 
@@ -1000,7 +1014,7 @@ int main()
                                 mensaje();
                                 system("cls");
                                 mensajeListadoConsumo();
-                                muestraConsumosArreglo(muestraConsu,vConsu);
+                                muestraConsumosArreglo(muestraConsu,vConsu,c.id);
                             }
 
 
@@ -2683,7 +2697,8 @@ void getApellido(char a[])
                              "Carmona", "Carrasco", "Castillo", "Castro", "Crespo", "Cruz", "Da Silva", "Delgado",
                              "Duran", "Esteban", "Fernandez", "Ferrer", "Flores", "Fuentes", "Gallardo", "Gallego", "Gimenez","Hidalgo", "Ibañez", "Iglesias", "Jimenez",
                              "Leon", "Lopez", "Lorenzo", "Lozano","Perez", "Prieto", "Ramos", "Rey", "Reyes", "Roca",  "Roman", "Saez", "Sanz",  "Suarez", "Torres", "Vargas", "Vazquez", "Vega", "Velasco",
-                             "Vicente", "Vidal", "Zarategui","romano","griego","persa"};
+                             "Vicente", "Vidal", "Zarategui","romano","griego","persa"
+                            };
 
     strcpy(a,apellidos[randomRango(0,sizeof(apellidos)/(sizeof(char)*100))]);
 
@@ -2926,27 +2941,27 @@ stConsumos cargaUnConsumo()
         case  2 :
             if( consu.anio % 4 == 0 && consu.anio % 100 != 0 || consu.anio % 400 == 0 )
             {
-                    do
-                    {
-                        gotoxy(34,7);
-                        printf("    ");
-                        gotoxy(3,7);
-                        printf("Ingrese el dia del Consumo.....");
-                        scanf("%d",&consu.dia);
-                    }
-                    while(consu.dia<1 || consu.dia>=30);
+                do
+                {
+                    gotoxy(34,7);
+                    printf("    ");
+                    gotoxy(3,7);
+                    printf("Ingrese el dia del Consumo.....");
+                    scanf("%d",&consu.dia);
+                }
+                while(consu.dia<1 || consu.dia>=30);
             }
 
 
             else
             {
-               do
-                    {
-                        gotoxy(3,7);
-                        printf("Ingrese el dia del Consumo.....");
-                        scanf("%d",&consu.dia);
-                    }
-                    while(consu.dia<1 || consu.dia>=29);
+                do
+                {
+                    gotoxy(3,7);
+                    printf("Ingrese el dia del Consumo.....");
+                    scanf("%d",&consu.dia);
+                }
+                while(consu.dia<1 || consu.dia>=29);
             }
 
         }
@@ -3316,33 +3331,41 @@ int arch2ArrayConsumoArchivoBaja(stConsumos a[],int v,int id)
 * \param validos
 *
 ***************************************************************************/
-void muestraConsumosArreglo(stConsumos a[],int v)
+void muestraConsumosArreglo(stConsumos a[],int v,int id)
 {
+    stConsumos c;
     int i=0;
-    while(i<v)
+    while(i<v )
     {
 
-
-        if(a[i].baja )
-        {
-            color(4);
-            muestraUnConusmo(a[i]);
-            color(7);
-
-        }
-        else
+        if(a[i].idCliente == id)
         {
 
-            muestraUnConusmo(a[i]);
+
+            if( a[i].baja  )
+            {
+                color(4);
+                muestraUnConusmo(a[i]);
+                color(7);
+
+            }
+            else
+            {
+
+                muestraUnConusmo(a[i]);
+
+            }
 
         }
-
-
         i++;
         if(i%5 ==0) /// Para que muestre de a 5 datos
         {
             system("pause");
         }
+
+
+
+
     }
 }
 
@@ -3641,7 +3664,7 @@ int archivoaMatrizConsumo (int dia,int mes,stConsumos consu[dia][mes],int cuenta
 * \return total de datos consumidos
 *
 **********************************************************************************/
-int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int vConsumidos)
+int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int vConsumidos,int id)
 {
     stConsumos c;
     FILE *pArch =fopen(AR_CONSUMO,"rb");
@@ -3650,11 +3673,14 @@ int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int 
     {
         while(fread(&c,sizeof(stConsumos),1,pArch)>0)
         {
+
+
+
             for(int mes=1; mes<13; mes++)
             {
                 for(int dias=1; dias<32; dias++)
                 {
-                    if(c.dia==dias&&c.mes==mes)
+                    if(c.idCliente == id && c.dia==dias&&c.mes==mes  )
                     {
 
                         mConsumos[dias][mes]=c;
@@ -3664,6 +3690,7 @@ int datosConsumidosTotal (int dia, int mes, stConsumos mConsumos [dia][mes],int 
                 }
 
             }
+
         }
         fclose(pArch);
     }
@@ -3795,7 +3822,7 @@ int arch2ArrayConsumoDiario(stConsumos a[], int v, int mes, int dia )
 *
 ***************************************************************************/
 
-int datosConsumidosMensual(int mes )
+int datosConsumidosMensual(int mes, int id )
 {
     stConsumos c;
     int datosMensual=0;
@@ -3805,7 +3832,7 @@ int datosConsumidosMensual(int mes )
         while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
         {
 
-            if(c.mes == mes && c.baja == 0 )
+            if(c.idCliente == id && c.mes == mes && c.baja == 0 )
             {
                 datosMensual=datosMensual+c.datosConsumidos;
             }
@@ -3826,17 +3853,18 @@ int datosConsumidosMensual(int mes )
 *
 ***************************************************************************/
 
-int datosConsumidosDiarios(int mes,int dia )
+int datosConsumidosDiarios(int mes,int dia,int id )
 {
     stConsumos c;
     int datosDiarios=0;
     FILE *pArchConsumo = fopen(AR_CONSUMO,"rb");
     if(pArchConsumo)
     {
+
         while(fread(&c,sizeof(stConsumos),1,pArchConsumo)>0)
         {
 
-            if(c.mes == mes && c.dia == dia && c.baja == 0 )
+            if( c.mes == mes && c.dia == dia && c.baja == 0 && c.idCliente == id  )
             {
                 datosDiarios=datosDiarios+c.datosConsumidos;
             }
